@@ -8,9 +8,13 @@ import (
 )
 
 type ProfileRepo interface {
+	Begin(ctx context.Context) (*sql.Tx, error)
+    WithTx(tx *sql.Tx) ProfileRepo
+
+	// crud methods 
 	CreateProfile(ctx context.Context, user *models.Profile) (*models.Profile, error)
-	AddSocial(ctx context.Context, links []models.UserSocialLink) error
-	CreatePupose(ctx context.Context, puposes []models.UserPurpose) (*models.UserPurpose, error)
+	AddSocial(ctx context.Context, links []models.UserSocialLink) ([]models.UserSocialLink, error)
+	AddPurposes(ctx context.Context, puposes []models.UserPurpose) ([]models.UserPurpose, error)
 	
 	GetUserProfile(ctx context.Context, userId int64) (*models.Profile, error)
 	GetUserSocials(ctx context.Context, userID int64) ([]string, error)
@@ -28,8 +32,15 @@ type ProfileRepo interface {
 
 }
 
+type DBTX interface {
+    ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
+    PrepareContext(context.Context, string) (*sql.Stmt, error)
+    QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+    QueryRowContext(context.Context, string, ...interface{}) *sql.Row
+}
+
 type PostgresProfileRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
 func NewPostgresProfileRepo(db *sql.DB) *PostgresProfileRepo {

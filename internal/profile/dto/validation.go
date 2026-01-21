@@ -18,7 +18,7 @@ type ProfileInfoDTO struct {
 	Patronymic  *string `json:"patronymic,omitempty"`
 	Email       string  `json:"email" validate:"required,email"`
 	PhoneNumber *string `json:"phone_number,omitempty" validate:"omitempty,e164"`
-	Sex         int     `json:"sex" validate:"oneof=0 1"`
+	Sex         *int    `json:"sex" validate:"omitempty,oneof=0 1"`
 	Description string  `json:"description" validate:"max=500"`
 	Profession  *string `json:"profession,omitempty"`
 }

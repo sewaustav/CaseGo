@@ -8,13 +8,33 @@ import (
 	"github.com/sewaustav/CaseGoProfile/internal/profile/models"
 )
 
-func (s *ProfileService) CreateProfile(ctx context.Context, req dto.CreateProfileRequest, userID int64, role models.UserRole) (*models.Profile, []models.UserPurpose, []models.UserSocialLink, error) {
-	// todo: fix
+func (s *ProfileService) CreateProfile(
+	ctx context.Context, 
+	req dto.CreateProfileRequest, 
+	userID int64, 
+	role models.UserRole) (
+		*models.Profile, 
+		[]models.UserSocialLink, 
+		[]models.UserPurpose, 
+		error,
+		) {
+
+	tx, err := s.repo.Begin(ctx)
+    if err != nil {
+        return nil, nil, nil, err
+    }
+
+	defer tx.Rollback()
+
+	txRepo := s.repo.WithTx(tx)
+	
 	var sexPtr *models.UserSex
-	if &req.Info.Sex != nil { 
-		sexValue := models.UserSex(req.Info.Sex)
+	if req.Info.Sex != nil {
+		sexValue := models.UserSex(*req.Info.Sex)
 		sexPtr = &sexValue
 	}
+
+	now := time.Now()
 	
 	profile := &models.Profile{
 		UserID: userID,
@@ -26,8 +46,8 @@ func (s *ProfileService) CreateProfile(ctx context.Context, req dto.CreateProfil
 		Surname: req.Info.Surname,
 		Email: req.Info.Email,
 		CaseCount: 0,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: now,
+		UpdatedAt: now,
 		// optional - nil possible
 		Patronymic: req.Info.Patronymic,
 		PhoneNumber: req.Info.PhoneNumber,
@@ -54,5 +74,23 @@ func (s *ProfileService) CreateProfile(ctx context.Context, req dto.CreateProfil
 		})
 	}
 
+	createdProfile, err := txRepo.CreateProfile(ctx, profile)
+	if err != nil {
+		return nil, nil, nil, err 
+	}
+	addedLinks, err := txRepo.AddSocial(ctx, socialLinks)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	createdPurposes, err := txRepo.AddPurposes(ctx, purposes)
+	if err != nil {
+		return nil, nil, nil, err 
+	}
+
+	if err := tx.Commit(); err != nil {
+        return nil, nil, nil, err
+    }
+
+	return createdProfile, addedLinks, createdPurposes, nil
 	
 }
