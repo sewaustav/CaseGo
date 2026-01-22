@@ -31,3 +31,7 @@ type SocialLinkDTO struct {
 type UserPurposeDTO struct {
 	Purpose string `json:"purpose" validate:"required,min=5"`
 }
+
+type UpdateProfileInfoDTO struct {
+	
+}

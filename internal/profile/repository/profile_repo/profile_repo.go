@@ -22,6 +22,7 @@ type ProfileRepo interface {
 	GetAllUsers(ctx context.Context, limit int) ([]models.Profile, error)
 
 	UpdateProfile(ctx context.Context, user *models.Profile) (*models.Profile, error)
+	PathcProfile(ctx context.Context, input *models.Profile) (*models.Profile, error) // todo - write dto for method
 	EditSocial(ctx context.Context, link string, id int64) ([]string, error)
 	EditPurpose(ctx context.Context, purpose string, id int64) (*models.UserPurpose, error)
 
