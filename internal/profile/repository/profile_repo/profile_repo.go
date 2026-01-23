@@ -18,6 +18,7 @@ type ProfileRepo interface {
 	AddPurposes(ctx context.Context, puposes []models.UserPurpose) ([]models.UserPurpose, error)
 	
 	GetProfileByID(ctx context.Context, id int64) (*models.Profile, error)
+	GetUserByProfileID(ctx context.Context, id, userID int64) (int64, error)
 	GetUserProfile(ctx context.Context, userID int64) (*models.Profile, error)
 	GetUserSocials(ctx context.Context, userID int64) ([]models.UserSocialLink, error)
 	GetUserPurposes(ctx context.Context, userID int64) ([]models.UserPurpose, error)

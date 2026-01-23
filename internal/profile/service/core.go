@@ -98,6 +98,44 @@ func (s *ProfileService) CreateProfileService(
 	
 }
 
+func (s *ProfileService) AddPurposesService(ctx context.Context, req []dto.UserPurposeDTO, usr models.UserIdentity) ([]models.UserPurpose, error) {
+	
+	var purposes []models.UserPurpose
+
+	for _, purpose := range req {
+		purposes = append(purposes, models.UserPurpose{
+			Purpose: purpose.Purpose,
+			UserID: usr.UserID,
+		})
+	}
+
+	createdPurposes, err := s.repo.AddPurposes(ctx, purposes) 
+	if err != nil {
+		return nil, err 
+	}
+
+	return createdPurposes, nil 
+}
+
+func (s *ProfileService) AddSocialLinksService(ctx context.Context, req []dto.SocialLinkDTO, usr models.UserIdentity) ([]models.UserSocialLink, error) {
+	var links []models.UserSocialLink 
+
+	for _, link := range req {
+		links = append(links, models.UserSocialLink{
+			UserID: usr.UserID,
+			Type: link.Type,
+			URL: link.URL,
+		})
+	}
+
+	addedLinks, err := s.repo.AddSocial(ctx, links)
+	if err != nil {
+		return nil, err 
+	}
+
+	return addedLinks, nil 
+} 
+
 // method for put
 func(s *ProfileService) UpdateProfileService(ctx context.Context, usr models.UserIdentity, req dto.ProfileInfoDTO) (*models.Profile, error) {
 	var sexPtr *models.UserSex
@@ -258,6 +296,40 @@ func (s *ProfileService) DeleteProfileWithoutRecoveryService(ctx context.Context
 	}
 
 	if err := s.repo.DeleteProfileWithoutRecovery(ctx, usr.UserID); err != nil {
+		return err 
+	}
+
+	return nil 
+}
+
+func (s *ProfileService) DeletePuposeService(ctx context.Context, id int64, usr models.UserIdentity) error {
+	userID, err := s.repo.GetUserByProfileID(ctx, id, usr.UserID)
+	if err != nil {
+		return err 
+	}
+
+	if userID != usr.UserID {
+		return fmt.Errorf("forbidden")
+	}
+
+	if err := s.repo.DeletePupose(ctx, id); err != nil {
+		return err 
+	}
+
+	return nil 
+}
+
+func (s *ProfileService) DeleteLinkService(ctx context.Context, id int64, usr models.UserIdentity) error {
+	userID, err := s.repo.GetUserByProfileID(ctx, id, usr.UserID)
+	if err != nil {
+		return err 
+	}
+
+	if userID != usr.UserID {
+		return fmt.Errorf("forbidden")
+	}
+
+	if err := s.repo.DeleteSocial(ctx, id); err != nil {
 		return err 
 	}
 
