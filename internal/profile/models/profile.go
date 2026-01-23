@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type UserSex int
 
@@ -21,7 +23,7 @@ type Profile struct {
 	ID          int64     `json:"id" db:"id"`
 	UserID      int64     `json:"user_id" db:"user_id"`
 	Avatar      string    `json:"avatar" db:"avatar"`
-	IsActive    bool      `json:"is_active" db:"is_active"`
+	IsActive    bool      `json:"is_active" db:"is_active"`  
 	Description string    `json:"description" db:"description"`
 	Username    string    `json:"username" db:"username"`
 	Name        string    `json:"name" db:"name"`
@@ -47,4 +49,15 @@ type UserPurpose struct {
 	ID      int64  `json:"id" db:"id"`
 	UserID  int64  `json:"user_id" db:"user_id"`
 	Purpose string `json:"purpose" db:"purpose"`
+}
+
+type UserIdentity struct {
+    UserID   int64
+    Role UserRole
+}
+
+type UserProfile struct {
+	UsrProfile Profile
+	UsrPurposes []UserPurpose
+	UsrSocials []UserSocialLink
 }

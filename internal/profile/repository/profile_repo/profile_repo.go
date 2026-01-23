@@ -17,9 +17,10 @@ type ProfileRepo interface {
 	AddSocial(ctx context.Context, links []models.UserSocialLink) ([]models.UserSocialLink, error)
 	AddPurposes(ctx context.Context, puposes []models.UserPurpose) ([]models.UserPurpose, error)
 	
-	GetUserProfile(ctx context.Context, userId int64) (*models.Profile, error)
-	GetUserSocials(ctx context.Context, userID int64) ([]string, error)
-	GetUserPurposes(ctx context.Context, userID int64)
+	GetProfileByID(ctx context.Context, id int64) (*models.Profile, error)
+	GetUserProfile(ctx context.Context, userID int64) (*models.Profile, error)
+	GetUserSocials(ctx context.Context, userID int64) ([]models.UserSocialLink, error)
+	GetUserPurposes(ctx context.Context, userID int64) ([]models.UserPurpose, error)
 	GetAllUsers(ctx context.Context, limit int) ([]models.Profile, error)
 
 	UpdateProfile(ctx context.Context, user *models.Profile) (*models.Profile, error)

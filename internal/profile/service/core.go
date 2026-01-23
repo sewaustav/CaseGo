@@ -2,6 +2,7 @@ package profileService
 
 import (
 	"context"
+	"fmt"
 
 	"time"
 
@@ -12,16 +13,14 @@ import (
 func (s *ProfileService) CreateProfileService(
 	ctx context.Context, 
 	req dto.CreateProfileRequest, 
-	userID int64) (
-		*models.Profile, 
-		[]models.UserSocialLink, 
-		[]models.UserPurpose, 
+	usr models.UserIdentity) (
+		*models.UserProfile, 
 		error,
 		) {
 
 	tx, err := s.repo.Begin(ctx)
     if err != nil {
-        return nil, nil, nil, err
+        return nil, err
     }
 
 	defer tx.Rollback()
@@ -37,7 +36,7 @@ func (s *ProfileService) CreateProfileService(
 	now := time.Now()
 	
 	profile := &models.Profile{
-		UserID: userID,
+		UserID: usr.UserID,
 		Avatar: req.Info.Avatar,
 		IsActive: true,
 		Description: req.Info.Description,
@@ -61,7 +60,7 @@ func (s *ProfileService) CreateProfileService(
 		socialLinks = append(socialLinks, models.UserSocialLink{
 			Type: link.Type, 
 			URL: link.URL, 
-			UserID: userID,
+			UserID: usr.UserID,
 		})
 	}
 
@@ -70,33 +69,37 @@ func (s *ProfileService) CreateProfileService(
 	for _, purpose := range req.Purposes {
 		purposes = append(purposes, models.UserPurpose{
 			Purpose: purpose.Purpose,
-			UserID: userID,
+			UserID: usr.UserID,
 		})
 	}
 
 	createdProfile, err := txRepo.CreateProfile(ctx, profile)
 	if err != nil {
-		return nil, nil, nil, err 
+		return nil, err 
 	}
 	addedLinks, err := txRepo.AddSocial(ctx, socialLinks)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	createdPurposes, err := txRepo.AddPurposes(ctx, purposes)
 	if err != nil {
-		return nil, nil, nil, err 
+		return nil, err 
 	}
 
 	if err := tx.Commit(); err != nil {
-        return nil, nil, nil, err
+        return nil, err
     }
 
-	return createdProfile, addedLinks, createdPurposes, nil
+	return &models.UserProfile{
+		UsrProfile: *createdProfile,
+		UsrPurposes: createdPurposes,
+		UsrSocials: addedLinks,
+	}, nil
 	
 }
 
 // method for put
-func(s *ProfileService) UpdateProfileService(ctx context.Context, userID int64, req dto.ProfileInfoDTO) (*models.Profile, error) {
+func(s *ProfileService) UpdateProfileService(ctx context.Context, usr models.UserIdentity, req dto.ProfileInfoDTO) (*models.Profile, error) {
 	var sexPtr *models.UserSex
 	if req.Sex != nil {
 		sexValue := models.UserSex(*req.Sex)
@@ -108,7 +111,7 @@ func(s *ProfileService) UpdateProfileService(ctx context.Context, userID int64, 
 	now := time.Now()
 	
 	profile := &models.Profile{
-		UserID: userID,
+		UserID: usr.UserID,
 		Avatar: req.Avatar,
 		IsActive: true,
 		Description: req.Description,
@@ -135,16 +138,16 @@ func(s *ProfileService) UpdateProfileService(ctx context.Context, userID int64, 
 
 
 // partial - update. Note - in future special method for email/phone update
-func (s *ProfileService) PatchProfile(
+func (s *ProfileService) PatchProfileService(
 	ctx context.Context,
-	userID int64,
+	usr models.UserIdentity,
 	req dto.UpdateProfilePartialDTO,
 ) (*models.Profile, error) {
 
 	// todo - check is username unique
 
 
-	profile, err := s.repo.PathcProfile(ctx, userID, req)
+	profile, err := s.repo.PathcProfile(ctx, usr.UserID, req)
 
 	if err != nil {
 		return nil, err 
@@ -153,10 +156,10 @@ func (s *ProfileService) PatchProfile(
 	return profile, nil 
 }
 
-func (s *ProfileService) UpdateSocialLink(ctx context.Context, req dto.SocialLinkDTO, userID int64, id int64) ([]models.UserSocialLink, error) {
+func (s *ProfileService) UpdateSocialLinkService(ctx context.Context, req dto.SocialLinkDTO, usr models.UserIdentity, id int64) ([]models.UserSocialLink, error) {
 	link := &models.UserSocialLink{
 		ID: id,
-		UserID: userID,
+		UserID: usr.UserID,
 		Type: req.Type,
 		URL: req.URL,
 	}
@@ -171,10 +174,10 @@ func (s *ProfileService) UpdateSocialLink(ctx context.Context, req dto.SocialLin
 
 }
 
-func (s *ProfileService) UpdatePurpose(ctx context.Context, req dto.UserPurposeDTO, userID, id int64) ([]models.UserPurpose, error) {
+func (s *ProfileService) UpdatePurposeService(ctx context.Context, req dto.UserPurposeDTO, usr models.UserIdentity, id int64) ([]models.UserPurpose, error) {
 	purpose := &models.UserPurpose{
 		ID: id,
-		UserID: userID,
+		UserID: usr.UserID,
 		Purpose: req.Purpose,
 	}
 
@@ -184,4 +187,79 @@ func (s *ProfileService) UpdatePurpose(ctx context.Context, req dto.UserPurposeD
 	}
 
 	return purposes, nil 
+}
+
+
+// get methods
+func (s *ProfileService) GetUserProfileService(ctx context.Context, usr models.UserIdentity) (*models.UserProfile, error) {
+	profile, err := s.repo.GetUserProfile(ctx, usr.UserID)
+	if err != nil {
+		return nil, err 
+	}
+
+	purposes, err := s.repo.GetUserPurposes(ctx, usr.UserID)
+	if err != nil {
+		return nil, err 
+	}
+
+	links, err := s.repo.GetUserSocials(ctx, usr.UserID)
+	if err != nil {
+		return nil, err 
+	}
+
+	return &models.UserProfile{
+		UsrProfile: *profile,
+		UsrPurposes: purposes,
+		UsrSocials: links,
+	}, nil
+}
+
+func (s *ProfileService) GetUserProfileByIDService(ctx context.Context, usr models.UserIdentity, id int64) (*models.UserProfile, error) {
+	
+	profile, err := s.repo.GetProfileByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if usr.Role != models.Admin || profile.UserID != usr.UserID {
+		return nil, fmt.Errorf("forbidden")
+	}
+
+	purposes, err := s.repo.GetUserPurposes(ctx, usr.UserID)
+	if err != nil {
+		return nil, err 
+	}
+
+	links, err := s.repo.GetUserSocials(ctx, usr.UserID)
+	if err != nil {
+		return nil, err 
+	}
+
+	return &models.UserProfile{
+		UsrProfile: *profile,
+		UsrPurposes: purposes,
+		UsrSocials: links,
+	}, nil 
+
+}
+
+func (s *ProfileService) DeleteProfileService(ctx context.Context, usr models.UserIdentity) error {
+	
+	if err := s.repo.DeleteProfile(ctx, usr.UserID); err != nil {
+		return err 
+	}
+
+	return nil
+}
+
+func (s *ProfileService) DeleteProfileWithoutRecoveryService(ctx context.Context, usr models.UserIdentity) error {
+	if usr.Role != models.Admin {
+		return fmt.Errorf("forbidden")
+	}
+
+	if err := s.repo.DeleteProfileWithoutRecovery(ctx, usr.UserID); err != nil {
+		return err 
+	}
+
+	return nil 
 }
