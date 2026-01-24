@@ -40,10 +40,10 @@ func (s *ProfileService) CreateProfileService(
 		Avatar: req.Info.Avatar,
 		IsActive: true,
 		Description: req.Info.Description,
-		Username: req.Info.Username,
+		Username: req.Info.Username, // check is username unique
 		Name: req.Info.Name,
 		Surname: req.Info.Surname,
-		Email: req.Info.Email,
+		Email: req.Info.Email, // same as userame
 		CaseCount: 0,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -290,12 +290,12 @@ func (s *ProfileService) DeleteProfileService(ctx context.Context, usr models.Us
 	return nil
 }
 
-func (s *ProfileService) DeleteProfileWithoutRecoveryService(ctx context.Context, usr models.UserIdentity) error {
+func (s *ProfileService) DeleteProfileWithoutRecoveryService(ctx context.Context, usr models.UserIdentity, userID int64) error {
 	if usr.Role != models.Admin {
 		return fmt.Errorf("forbidden")
 	}
 
-	if err := s.repo.DeleteProfileWithoutRecovery(ctx, usr.UserID); err != nil {
+	if err := s.repo.DeleteProfileWithoutRecovery(ctx, userID); err != nil {
 		return err 
 	}
 

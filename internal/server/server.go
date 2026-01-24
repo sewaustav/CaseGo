@@ -3,7 +3,11 @@ package server
 import (
 	"net/http"
 
+	"github.com/sewaustav/CaseGoProfile/internal/profile/api"
 	"github.com/sewaustav/CaseGoProfile/internal/profile/repository/db"
+	profilerepo "github.com/sewaustav/CaseGoProfile/internal/profile/repository/profile_repo"
+	profileService "github.com/sewaustav/CaseGoProfile/internal/profile/service"
+	"github.com/sewaustav/CaseGoProfile/pkg/middleware"
 )
 
 type Sever struct {
@@ -25,7 +29,24 @@ func New() (*Sever, error) {
 		return nil, err 
 	}
 
-	return &Sever{
+	profileRepo := profilerepo.NewPostgresProfileRepo(database.GetDB())
 
+	profileService := profileService.NewProfileService(profileRepo)
+
+	jwtMiddleware := middleware.NewJwtAuthmiddleware()
+
+	profileHandlers := api.NewProfileHandler(profileService)
+
+	api := api.SetupRouter(profileHandlers, jwtMiddleware)
+
+	srv := &http.Server{
+		Addr: "8080",
+		Handler: api, 
+	}
+	
+
+	return &Sever{
+		HTTP: srv,
+		DB: database,
 	}, nil 
 }

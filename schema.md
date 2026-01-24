@@ -1,5 +1,9 @@
 api schema
 
+profile - post patch put delete get
+socials - post put delete
+purposes - post put delete
+
 POST /profile   →   Создание профиля пользователя
 Авторизация: требуется Bearer JWT
 Тело запроса (JSON):
@@ -81,6 +85,17 @@ PUT /profile  →   Полное обновление
   "profession":   "string?"       // необязательно, можно null
 }
 
+
+DELETE /profile   →   Удаление собственного профиля текущим пользователем
+
+Авторизация: требуется Bearer JWT 
+
+Параметры в URL: отсутствуют (ID пользователя берётся исключительно из JWT)
+
+DELETE /profile/?id= || /profile/?user_id=  →   Полное и окончательное удаление любого профиля (только для админов)
+
+Авторизация: требуется Bearer JWT (только админ)
+query - user_id или id профиля
 
 
 POST /me/social-links   →   Добавление одной или нескольких социальных ссылок
