@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Boolean, func
+from sqlalchemy import String, Integer, Boolean, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
@@ -25,6 +25,13 @@ class User(MyBaseModel):
 		index=True
 	)
 	hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+	
+	role: Mapped[int] = mapped_column(
+        Integer, 
+        default=1, 
+        server_default="1", 
+        nullable=False
+    )
 
 	is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 	is_verified: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 
 from schemas.token import TokenPair, RefreshTokenRequest
 from ...dependencies import get_db_session
@@ -26,7 +27,9 @@ async def login_for_access_token_endpoint(form_data: Annotated[OAuth2PasswordReq
 								 db: Annotated[AsyncSession, Depends(get_db_session)]) -> TokenPair:
 	"""Ручка для входа пользователя по username/email и паролю с созданием access_token и обновлением информации о сессии"""
 	user = await authenticate_user(form_data.username, db, form_data.password)
-	tokens_data = create_token_pair(user_id=user.id)
+	if user is None: 
+		raise HTTPException(status_code=401)
+	tokens_data = create_token_pair(user_id=user.id, additional_data={"user_role": user.role})
 
 	return tokens_data
 

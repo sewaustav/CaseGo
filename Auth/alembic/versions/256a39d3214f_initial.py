@@ -25,6 +25,7 @@ def upgrade() -> None:
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('hashed_password', sa.String(length=255), nullable=False),
+    sa.Column('role', sa.Integer, default='1', nullable=False),
     sa.Column('is_active', sa.Boolean(), server_default='true', nullable=False),
     sa.Column('is_verified', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),

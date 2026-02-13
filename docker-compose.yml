@@ -49,6 +49,71 @@ services:
     networks:
       - app-network
 
+  auth-fastapi:
+    build: 
+      context: ./Auth
+    container_name: auth_fastapi
+    ports:
+      - "${API_PORT_FORWARD:-8000}:${API_PORT:-8000}"
+    env_file:
+      - Auth/.env
+    volumes:
+      - ./Auth/src:/app/src
+      - ./Auth/keys:/app/keys:ro
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+      auth-redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=2)" ]
+      timeout: 5s
+      start_period: 15s
+      retries: 10
+    networks:
+      - app-network
+
+  auth-postgres:
+    image: postgres:16-alpine
+    container_name: auth_postgres
+    restart: unless-stopped
+    env_file:
+        - Auth/.env
+    ports:
+      - "5444:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-network
+
+  auth-redis:
+    image: redis:8.2.1-alpine
+    container_name: auth_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT_FORWARD}:6379"
+    env_file:
+      - Auth/.env
+    volumes:
+      - auth_redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-network
+
+volumes:
+  auth_postgres_data:
+  auth_redis_data:
+
 networks:
   app-network:
     driver: bridge
