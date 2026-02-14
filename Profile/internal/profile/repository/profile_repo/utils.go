@@ -28,7 +28,7 @@ func (r *PostgresProfileRepo) fetchProfile(ctx context.Context, builder squirrel
 	var p models.Profile
 	err = r.db.QueryRowContext(ctx, sql, args...).Scan(
 		&p.ID, &p.UserID, &p.Avatar, &p.IsActive, &p.Description, &p.Username, &p.Name, &p.Surname,
-		&p.Patronymic, &p.Age, &p.Sex, &p.Profession, &p.CaseCount, &p.CreatedAt, &p.UpdatedAt,
+		&p.Patronymic, &p.City, &p.Age, &p.Sex, &p.Profession, &p.CaseCount, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

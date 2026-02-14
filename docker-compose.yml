@@ -94,6 +94,7 @@ services:
   auth-redis:
     image: redis:8.2.1-alpine
     container_name: auth_redis
+    command: redis-server --requirepass redis_password
     restart: unless-stopped
     ports:
       - "${REDIS_PORT_FORWARD}:6379"

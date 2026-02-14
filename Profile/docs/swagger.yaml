@@ -1,5 +1,13 @@
 basePath: /profile/api/v1
 definitions:
+  github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO:
+    properties:
+      name:
+        type: string
+      parent_id:
+        minimum: 0
+        type: integer
+    type: object
   github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.CreateProfileRequest:
     properties:
       info:
@@ -19,18 +27,20 @@ definitions:
     type: object
   github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.ProfileInfoDTO:
     properties:
+      age:
+        maximum: 120
+        minimum: 14
+        type: integer
       avatar:
+        type: string
+      city:
         type: string
       description:
         maxLength: 500
         type: string
-      email:
-        type: string
       name:
         type: string
       patronymic:
-        type: string
-      phone_number:
         type: string
       profession:
         type: string
@@ -47,7 +57,6 @@ definitions:
         type: string
     required:
     - avatar
-    - email
     - name
     - surname
     - username
@@ -64,20 +73,20 @@ definitions:
     type: object
   github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UpdateProfilePartialDTO:
     properties:
+      age:
+        maximum: 120
+        minimum: 14
+        type: integer
       avatar:
+        type: string
+      city:
         type: string
       description:
         maxLength: 500
         type: string
-      email:
-        description: warning!!! maybe not there
-        type: string
       name:
         type: string
       patronymic:
-        type: string
-      phone_number:
-        description: same as email
         type: string
       profession:
         type: string
@@ -103,15 +112,17 @@ definitions:
     type: object
   github_com_YoungFlores_Case_Go_Profile_internal_profile_models.Profile:
     properties:
+      age:
+        type: integer
       avatar:
         type: string
       case_count:
         type: integer
+      city:
+        type: string
       created_at:
         type: string
       description:
-        type: string
-      email:
         type: string
       id:
         type: integer
@@ -120,8 +131,6 @@ definitions:
       name:
         type: string
       patronymic:
-        type: string
-      phone_number:
         type: string
       profession:
         type: string
@@ -151,6 +160,114 @@ info:
   title: Profile Service API
   version: "1.0"
 paths:
+  /categories:
+    get:
+      description: Возвращает полный список категорий профессий
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO'
+            type: array
+      summary: Получить все категории
+      tags:
+      - profession-category
+    post:
+      consumes:
+      - application/json
+      description: Создает новую категорию (только для админов)
+      parameters:
+      - description: Данные категории
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать категорию профессий
+      tags:
+      - profession-category
+  /categories/{id}:
+    get:
+      description: Возвращает одну категорию по её уникальному идентификатору
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO'
+        "400":
+          description: Invalid id
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить категорию по ID
+      tags:
+      - profession-category
+  /categories/parent/{parentID}:
+    get:
+      description: Возвращает список категорий, привязанных к конкретному родителю
+      parameters:
+      - description: Parent ID
+        in: path
+        name: parentID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO'
+            type: array
+        "400":
+          description: Invalid parentID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить подкатегории по ParentID
+      tags:
+      - profession-category
   /profile:
     delete:
       responses:
@@ -327,38 +444,6 @@ paths:
       summary: Удалить цель
       tags:
       - purpose
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: ID цели
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Данные цели
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO'
-        "403":
-          description: Forbidden - Not your purpose
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      tags:
-      - purpose
   /profile/purposes:
     post:
       consumes:
@@ -464,6 +549,144 @@ paths:
       summary: Обновить конкретную соц. ссылку
       tags:
       - social
+  /profiles/purpose/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID цели
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные цели
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO'
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить конкретную цель
+      tags:
+      - purpose
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Фильтрация профилей по профессии, возрасту, городу и полу
+      parameters:
+      - description: ID профессии
+        in: query
+        name: profession_id
+        type: integer
+      - description: Название профессии
+        in: query
+        name: profession
+        type: string
+      - description: Мин. возраст
+        in: query
+        name: min_age
+        type: integer
+      - description: Макс. возраст
+        in: query
+        name: max_age
+        type: integer
+      - description: Город
+        in: query
+        name: city
+        type: string
+      - description: Пол (0 или 1)
+        in: query
+        name: sex
+        type: integer
+      - description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - description: Страница
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_models.Profile'
+            type: array
+        "400":
+          description: Invalid search params
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Поиск профилей по фильтрам
+      tags:
+      - search
+  /search/fio:
+    get:
+      consumes:
+      - application/json
+      description: Поиск по имени, фамилии или отчеству
+      parameters:
+      - description: Имя
+        in: query
+        name: name
+        type: string
+      - description: Фамилия
+        in: query
+        name: surname
+        type: string
+      - description: Отчество
+        in: query
+        name: patronymic
+        type: string
+      - description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - description: Страница
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_models.Profile'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Поиск профилей по ФИО
+      tags:
+      - search
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.

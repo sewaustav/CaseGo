@@ -1,12 +1,13 @@
 package profile_handler
 
 import (
+
 	"github.com/YoungFlores/Case_Go/Profile/internal/profile/models"
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	UserIDKey = "user_id"
+	UserIDKey = "sub"
 	RoleKey   = "role"
 )
 
@@ -26,7 +27,7 @@ func (h *ProfileHandler) GetUserID(c *gin.Context) (int64, models.UserRole, bool
 		return 0, 0, false
 	}
 
-	role, ok := roleAny.(int) // check user role format. if string - write method to convert
+	role, ok := roleAny.(int) 
 	if !ok {
 		return 0, 0, false
 	}

@@ -9,6 +9,172 @@
     "host": "localhost:8080",
     "basePath": "/profile/api/v1",
     "paths": {
+        "/categories": {
+            "get": {
+                "description": "Возвращает полный список категорий профессий",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profession-category"
+                ],
+                "summary": "Получить все категории",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создает новую категорию (только для админов)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profession-category"
+                ],
+                "summary": "Создать категорию профессий",
+                "parameters": [
+                    {
+                        "description": "Данные категории",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/parent/{parentID}": {
+            "get": {
+                "description": "Возвращает список категорий, привязанных к конкретному родителю",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profession-category"
+                ],
+                "summary": "Получить подкатегории по ParentID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent ID",
+                        "name": "parentID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parentID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "description": "Возвращает одну категорию по её уникальному идентификатору",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profession-category"
+                ],
+                "summary": "Получить категорию по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid id",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "security": [
@@ -198,57 +364,6 @@
             }
         },
         "/profile/purpose/{id}": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "purpose"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID цели",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные цели",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Not your purpose",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -515,9 +630,237 @@
                     }
                 }
             }
+        },
+        "/profiles/purpose/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "purpose"
+                ],
+                "summary": "Обновить конкретную цель",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID цели",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные цели",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UserPurposeDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Фильтрация профилей по профессии, возрасту, городу и полу",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Поиск профилей по фильтрам",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID профессии",
+                        "name": "profession_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Название профессии",
+                        "name": "profession",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Мин. возраст",
+                        "name": "min_age",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Макс. возраст",
+                        "name": "max_age",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Город",
+                        "name": "city",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Пол (0 или 1)",
+                        "name": "sex",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Лимит",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Страница",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_models.Profile"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid search params",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/fio": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Поиск по имени, фамилии или отчеству",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Поиск профилей по ФИО",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Имя",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фамилия",
+                        "name": "surname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Отчество",
+                        "name": "patronymic",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Лимит",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Страница",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_YoungFlores_Case_Go_Profile_internal_profile_models.Profile"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "github_com_YoungFlores_Case_Go_Profile_internal_profession_categories_models.CategoryDTO": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
         "github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.CreateProfileRequest": {
             "type": "object",
             "required": [
@@ -547,29 +890,30 @@
             "type": "object",
             "required": [
                 "avatar",
-                "email",
                 "name",
                 "surname",
                 "username"
             ],
             "properties": {
+                "age": {
+                    "type": "integer",
+                    "maximum": 120,
+                    "minimum": 14
+                },
                 "avatar": {
+                    "type": "string"
+                },
+                "city": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string",
                     "maxLength": 500
                 },
-                "email": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
                 "patronymic": {
-                    "type": "string"
-                },
-                "phone_number": {
                     "type": "string"
                 },
                 "profession": {
@@ -610,25 +954,25 @@
         "github_com_YoungFlores_Case_Go_Profile_internal_profile_dto.UpdateProfilePartialDTO": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer",
+                    "maximum": 120,
+                    "minimum": 14
+                },
                 "avatar": {
+                    "type": "string"
+                },
+                "city": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string",
                     "maxLength": 500
                 },
-                "email": {
-                    "description": "warning!!! maybe not there",
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
                 "patronymic": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "description": "same as email",
                     "type": "string"
                 },
                 "profession": {
@@ -666,19 +1010,22 @@
         "github_com_YoungFlores_Case_Go_Profile_internal_profile_models.Profile": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer"
+                },
                 "avatar": {
                     "type": "string"
                 },
                 "case_count": {
                     "type": "integer"
                 },
+                "city": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
                 "description": {
-                    "type": "string"
-                },
-                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -691,9 +1038,6 @@
                     "type": "string"
                 },
                 "patronymic": {
-                    "type": "string"
-                },
-                "phone_number": {
                     "type": "string"
                 },
                 "profession": {

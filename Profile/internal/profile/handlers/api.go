@@ -6,7 +6,7 @@ import (
 )
 
 func (h *ProfileHandler) RegisterRoutes(rg *gin.RouterGroup, jwtMiddleWare *rs256.JWTAuthMiddleware) {
-	routers := rg.Group("/profiles")
+	routers := rg.Group("/profile")
 	routers.Use(jwtMiddleWare.Handler())
 	{
 		routers.POST("", h.CreateProfileHandler)

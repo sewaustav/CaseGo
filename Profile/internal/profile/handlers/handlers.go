@@ -3,6 +3,7 @@ package profile_handler
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -39,7 +40,7 @@ func NewProfileHandler(service *profileService.ProfileService) *ProfileHandler {
 // @Router /profile [post]
 func (h *ProfileHandler) CreateProfileHandler(c *gin.Context) {
 	ctx := c.Request.Context()
-
+	slog.Info("Create profile request")
 	userID, role, exist := h.GetUserID(c)
 	if !exist {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -316,6 +317,7 @@ func (h *ProfileHandler) UpdateLinkHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, links)
 }
 
+// @Summary Обновить конкретную цель
 // @Tags purpose
 // @Accept json
 // @Produce json
@@ -323,8 +325,9 @@ func (h *ProfileHandler) UpdateLinkHandler(c *gin.Context) {
 // @Param id path int true "ID цели"
 // @Param body body dto.UserPurposeDTO true "Данные цели"
 // @Success 200 {object} dto.UserPurposeDTO
-// @Failure 403 {object} map[string]string "Forbidden - Not your purpose"
-// @Router /profile/purpose/{id} [put]
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Router /profiles/purpose/{id} [put]
 func (h *ProfileHandler) UpdatePurposeHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -400,7 +403,7 @@ func (h *ProfileHandler) GetUserProfileHandler(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"info": "user is not active"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed "})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed %s", err)})
 		return
 	}
 

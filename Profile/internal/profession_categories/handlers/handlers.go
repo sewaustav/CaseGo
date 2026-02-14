@@ -21,6 +21,7 @@ func NewProfessionCategoryHandler(service *categoryService.ProfessionCategorySer
 	}
 }
 
+
 func (h *ProfessionCategoryHandler) GetRole(c *gin.Context) (userModel.UserRole, bool) {
 	userRole, exist := c.Get("role")
 	if !exist {
@@ -36,6 +37,19 @@ func (h *ProfessionCategoryHandler) GetRole(c *gin.Context) (userModel.UserRole,
 
 }
 
+// CreateCategoryHandler godoc
+// @Summary Создать категорию профессий
+// @Description Создает новую категорию (только для админов)
+// @Tags profession-category
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body models.CategoryDTO true "Данные категории"
+// @Success 201 {object} models.CategoryDTO
+// @Failure 400 {object} map[string]string "Invalid input"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Router /categories [post]
 func (h *ProfessionCategoryHandler) CreateCategoryHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -66,6 +80,13 @@ func (h *ProfessionCategoryHandler) CreateCategoryHandler(c *gin.Context) {
 
 }
 
+// GetCategoriesHandler godoc
+// @Summary Получить все категории
+// @Description Возвращает полный список категорий профессий
+// @Tags profession-category
+// @Produce json
+// @Success 200 {array} models.CategoryDTO
+// @Router /categories [get]
 func (h *ProfessionCategoryHandler) GetCategoriesHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -78,6 +99,15 @@ func (h *ProfessionCategoryHandler) GetCategoriesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, category)
 }
 
+// GetCategoryByParentIDHandler godoc
+// @Summary Получить подкатегории по ParentID
+// @Description Возвращает список категорий, привязанных к конкретному родителю
+// @Tags profession-category
+// @Produce json
+// @Param parentID path int true "Parent ID"
+// @Success 200 {array} models.CategoryDTO
+// @Failure 400 {object} map[string]string "Invalid parentID"
+// @Router /categories/parent/{parentID} [get]
 func (h *ProfessionCategoryHandler) GetCategoryByParentIDHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -97,6 +127,15 @@ func (h *ProfessionCategoryHandler) GetCategoryByParentIDHandler(c *gin.Context)
 
 }
 
+// GetCategoryByIDHandler godoc
+// @Summary Получить категорию по ID
+// @Description Возвращает одну категорию по её уникальному идентификатору
+// @Tags profession-category
+// @Produce json
+// @Param id path int true "Category ID"
+// @Success 200 {object} models.CategoryDTO
+// @Failure 400 {object} map[string]string "Invalid id"
+// @Router /categories/{id} [get]
 func (h *ProfessionCategoryHandler) GetCategoryByIDHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 

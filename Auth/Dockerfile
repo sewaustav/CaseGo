@@ -22,6 +22,7 @@ ENV PYTHONUNBUFFERED="true" \
   UV_COMPILE_BYTECODE=1 \
   UV_PROJECT_ENVIRONMENT="/home/python/.local" \
   PATH="${PATH}:/home/python/.local/bin" \
+  PYTHONUNBUFFERED=1 \
   USER="python"
 
 WORKDIR /app

@@ -1,11 +1,10 @@
 # Ключи шифрования
-*.pem
+
 *.key
 *.p12
 *.pfx
 *.jks
 *.keystore
-keys/
 
 # Git
 .git

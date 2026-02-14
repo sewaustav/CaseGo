@@ -1,3 +1,4 @@
+import sys
 from passlib.context import CryptContext
 from typing import Optional
 
@@ -23,7 +24,6 @@ def get_password_hash(password: str) -> str:
 
 # ======== Аутентификация ========
 async def authenticate_user(login: str, db: AsyncSession, password: str) -> Optional[User]:
-	"""Аутентификация пользователя по username/email и password"""
 	user = await get_user_by_login(login=login, db=db)
 	if not user or not verify_password(password, str(user.hashed_password)):
 		raise HTTPException(
@@ -32,3 +32,4 @@ async def authenticate_user(login: str, db: AsyncSession, password: str) -> Opti
 			headers={"WWW-Authenticate": "Bearer"},
 		)
 	return user
+

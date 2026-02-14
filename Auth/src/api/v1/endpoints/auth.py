@@ -28,8 +28,8 @@ async def login_for_access_token_endpoint(form_data: Annotated[OAuth2PasswordReq
 	"""Ручка для входа пользователя по username/email и паролю с созданием access_token и обновлением информации о сессии"""
 	user = await authenticate_user(form_data.username, db, form_data.password)
 	if user is None: 
-		raise HTTPException(status_code=401)
-	tokens_data = create_token_pair(user_id=user.id, additional_data={"user_role": user.role})
+		raise HTTPException(status_code=401, detail="user is none")
+	tokens_data = create_token_pair(user_id=user.id, additional_data={"user_role": str(user.role)})
 
 	return tokens_data
 
