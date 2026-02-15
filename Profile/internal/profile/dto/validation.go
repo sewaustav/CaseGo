@@ -44,3 +44,7 @@ type UpdateProfilePartialDTO struct {
 	Description *string `json:"description" validate:"omitempty,max=500"`
 	Profession  *string `json:"profession"`
 }
+
+type ProfessionDTO struct {
+	ProfessionID int16 `json:"profession_id" validate:"required"`
+}

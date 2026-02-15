@@ -35,6 +35,13 @@ type ProfileRepo interface {
 	DeleteSocial(ctx context.Context, id int64) error
 	DeleteProfile(ctx context.Context, userID int64) error
 	DeleteProfileWithoutRecovery(ctx context.Context, userID int64) error
+
+	// professions methods
+	AddProfession(ctx context.Context, profession *models.UserProfession) (*models.UserProfession, error)
+	GetAllProfessions(ctx context.Context, userID int64) ([]models.UserProfession, error)
+	GetProfileIDByProfessionID(ctx context.Context, professionID int64) (int64, error)
+	EditProfession(ctx context.Context, profession *models.UserProfession) (*models.UserProfession, error)
+	DeleteProfession(ctx context.Context, professionID int64) error
 }
 
 type DBTX interface {

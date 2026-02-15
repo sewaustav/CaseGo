@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"database/sql"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/models"
@@ -72,4 +73,24 @@ func (r *PostgresCategoryRepo) GetCategoriesByParent(ctx context.Context, parent
 		return nil, err
 	}
 	return categories, nil
+}
+
+func (r *PostgresCategoryRepo) GetParentOfCategory(ctx context.Context, id int16) (*int16, error) {
+	query := psql.Select("parent_id").From("categories").Where(sq.Eq{"id": id})
+
+	sqlStr, args, err := query.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var tempID sql.NullInt16
+	if err = r.db.QueryRowContext(ctx, sqlStr, args...).Scan(&tempID); err != nil {
+		return nil, err
+	}
+
+	if !tempID.Valid {
+		return nil, nil
+	}
+
+	return &tempID.Int16, nil
 }

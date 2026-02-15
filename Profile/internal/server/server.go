@@ -41,7 +41,7 @@ func New() (*Sever, error) {
 	cr := repo.NewPostgresCategoryRepo(database.GetDB())
 	sr := searchRepo.NewPostgresSearchRepo(database.GetDB())
 
-	ps := profileService.NewProfileService(pr)
+	ps := profileService.NewProfileService(pr, cr)
 	cs := categoryService.NewProfessionCategoryService(cr)
 	ss := service.NewSearchService(sr)
 

@@ -12,6 +12,7 @@ type CategoryRepo interface {
 	GetCategoryByID(ctx context.Context, id int16) (*models.Category, error)
 	GetCategories(ctx context.Context) ([]models.Category, error)
 	GetCategoriesByParent(ctx context.Context, parentID int16) ([]models.Category, error)
+	GetParentOfCategory(ctx context.Context, id int16) (*int16, error)
 }
 
 type PostgresCategoryRepo struct {

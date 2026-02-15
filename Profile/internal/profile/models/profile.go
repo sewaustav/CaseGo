@@ -51,6 +51,12 @@ type UserPurpose struct {
 	Purpose string `json:"purpose" db:"purpose"`
 }
 
+type UserProfession struct {
+	ID           int64 `json:"id" db:"id"`
+	UserID       int64 `json:"user_id" db:"user_id"`
+	ProfessionID int16 `json:"profession_id" db:"profession_id"`
+}
+
 type UserIdentity struct {
 	UserID int64
 	Role   UserRole

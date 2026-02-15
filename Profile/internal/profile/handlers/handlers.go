@@ -602,3 +602,117 @@ func (h *ProfileHandler) DeleteSocialLinkHandler(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+func (h *ProfileHandler) AddProfessionsHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var userInfo models.UserIdentity
+	userInfo.Role = role
+	userInfo.UserID = userID
+
+	var body []dto.ProfessionDTO
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	p, err := h.service.AddProfessionService(ctx, userInfo, body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add professions"}) // validate error
+	}
+
+	c.JSON(http.StatusOK, p)
+
+}
+
+func (h *ProfileHandler) EditProfessionsHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var userInfo models.UserIdentity
+	userInfo.Role = role
+	userInfo.UserID = userID
+
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var body dto.ProfessionDTO
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	p, err := h.service.EditProfessionCategoryService(ctx, userInfo, &models.UserProfession{
+		ID:           id,
+		ProfessionID: body.ProfessionID,
+	})
+	if err != nil {
+		var forbErr *repoerr.RepoError
+
+		if errors.As(err, &forbErr) {
+			resp := map[string]string{
+				"error":   "Forbidden",
+				"field":   forbErr.Field,
+				"message": fmt.Sprintf("Edit id %s", forbErr.Field),
+			}
+			c.JSON(http.StatusForbidden, resp)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to edit professions"})
+	}
+
+	c.JSON(http.StatusOK, p)
+
+}
+
+func (h *ProfileHandler) DeleteProfessionsHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var userInfo models.UserIdentity
+	userInfo.Role = role
+	userInfo.UserID = userID
+
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		var forbErr *repoerr.RepoError
+
+		if errors.As(err, &forbErr) {
+			resp := map[string]string{
+				"error":   "Forbidden",
+				"field":   forbErr.Field,
+				"message": fmt.Sprintf("Edit id %s", forbErr.Field),
+			}
+			c.JSON(http.StatusForbidden, resp)
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	if err = h.service.DeleteProfessionService(ctx, id, userInfo); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete professions"})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}

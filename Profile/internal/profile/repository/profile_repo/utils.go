@@ -2,10 +2,13 @@ package profilerepo
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/YoungFlores/Case_Go/Profile/internal/profile/models"
+	repoerr "github.com/YoungFlores/Case_Go/Profile/internal/profile/repository/errors"
+	"github.com/lib/pq"
 )
 
 func extractField(constraint string) string {
@@ -34,4 +37,15 @@ func (r *PostgresProfileRepo) fetchProfile(ctx context.Context, builder squirrel
 		return nil, err
 	}
 	return &p, nil
+}
+
+func (r *PostgresProfileRepo) handlePgError(err error) error {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return &repoerr.RepoError{
+			Field: extractField(pgErr.Constraint),
+			Err:   repoerr.ErrConflict,
+		}
+	}
+	return err
 }
