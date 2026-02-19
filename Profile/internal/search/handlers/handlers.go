@@ -10,10 +10,10 @@ import (
 )
 
 type SearchHandler struct {
-	service *service.SearchService
+	service service.SearchServiceInterface
 }
 
-func NewSearchHandler(service *service.SearchService) *SearchHandler {
+func NewSearchHandler(service service.SearchServiceInterface) *SearchHandler {
 	return &SearchHandler{
 		service: service,
 	}

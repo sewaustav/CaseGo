@@ -12,15 +12,14 @@ import (
 )
 
 type ProfessionCategoryHandler struct {
-	service *categoryService.ProfessionCategoryService
+	service categoryService.CategoryService
 }
 
-func NewProfessionCategoryHandler(service *categoryService.ProfessionCategoryService) *ProfessionCategoryHandler {
+func NewProfessionCategoryHandler(service categoryService.CategoryService) *ProfessionCategoryHandler {
 	return &ProfessionCategoryHandler{
 		service: service,
 	}
 }
-
 
 func (h *ProfessionCategoryHandler) GetRole(c *gin.Context) (userModel.UserRole, bool) {
 	userRole, exist := c.Get("role")

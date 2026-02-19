@@ -7,6 +7,13 @@ import (
 	"github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/repo"
 )
 
+type CategoryService interface {
+	CreateCategoryService(ctx context.Context, req models.CategoryDTO) (*models.Category, error)
+	GetCategoriesService(ctx context.Context) ([]models.Category, error)
+	GetCategoriesByParentService(ctx context.Context, parentID int16) ([]models.Category, error)
+	GetCategoryByIDService(ctx context.Context, id int16) (*models.Category, error)
+}
+
 type ProfessionCategoryService struct {
 	repo repo.CategoryRepo
 }

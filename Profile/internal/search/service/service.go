@@ -9,6 +9,11 @@ import (
 	searchRepo "github.com/YoungFlores/Case_Go/Profile/internal/search/repository"
 )
 
+type SearchServiceInterface interface {
+	SearchProfileService(ctx context.Context, req dto.SearchDTO, helpers dto.SearchHelpersDTO) ([]models.Profile, error)
+	SearchByFioService(ctx context.Context, req dto.SearchByFIODTO, helpers dto.SearchHelpersDTO) ([]models.Profile, error)
+}
+
 type SearchService struct {
 	repo searchRepo.SearchRepo
 }

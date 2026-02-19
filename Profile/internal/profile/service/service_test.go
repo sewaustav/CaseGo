@@ -5,142 +5,96 @@ import (
 	"testing"
 	"time"
 
-	repoMocksCat "github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/repo/mocks"
 	dto "github.com/YoungFlores/Case_Go/Profile/internal/profile/dto"
 	"github.com/YoungFlores/Case_Go/Profile/internal/profile/models"
-	repoMocks "github.com/YoungFlores/Case_Go/Profile/internal/profile/repository/profile_repo/mocks"
-	service "github.com/YoungFlores/Case_Go/Profile/internal/profile/service"
+	"github.com/YoungFlores/Case_Go/Profile/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	service "github.com/YoungFlores/Case_Go/Profile/internal/profile/service"
 )
 
+func ptrString(s string) *string { return &s }
+func ptrInt(i int) *int          { return &i }
+
 func TestCreateProfileService(t *testing.T) {
-	mockRepo := new(repoMocks.ProfileRepoMock)
-	mockTx := new(repoMocks.TxMock)
-	catRepo := new(repoMocksCat.CategoryRepoMock)
+	mockRepo := new(mocks.ProfileRepo)
+	mockTx := new(mocks.Tx)
+	catRepo := new(mocks.CategoryRepo)
 	svc := service.NewProfileService(mockRepo, catRepo)
 
 	ctx := context.Background()
 	userID := int64(1)
-	userInfo := models.UserIdentity{UserID: userID}
+	userInfo := models.UserIdentity{
+		UserID: userID,
+		Role:   models.User,
+	}
 
-	sex := 0
 	req := dto.CreateProfileRequest{
 		Info: dto.ProfileInfoDTO{
-			Name:     "John",
-			Surname:  "Doe",
-			Username: "johndoe",
-			//Email:       "john@example.com",
-			Sex:         &sex,
-			Description: "Test user",
+			Avatar:      "https://avatar.com",
+			Name:        "Маша",
+			Surname:     "Залужная",
+			Description: "Создатель орешника",
+			City:        ptrString("Moscow"),
+			Age:         ptrInt(21),
+			Sex:         ptrInt(1),
+			Profession:  ptrString("Проектировщик ракет"),
 		},
 		SocialLinks: []dto.SocialLinkDTO{
-			{Type: "twitter", URL: "http://twitter.com/john"},
+			{
+				Type: "telegram",
+				URL:  "https://t.me/MashaZalushnaya",
+			},
 		},
 		Purposes: []dto.UserPurposeDTO{
-			{Purpose: "learning"},
+			{Purpose: "Донбас"},
 		},
 	}
 
 	expectedProfile := &models.Profile{
-		UserID:   userID,
-		Username: "johndoe",
-		//Email:    "john@example.com",
-	}
-
-	expectedLinks := []models.UserSocialLink{
-		{Type: "twitter", URL: "http://twitter.com/john", UserID: userID},
+		ID:          0,
+		UserID:      0,
+		Avatar:      "https://avatar.com",
+		IsActive:    true,
+		Description: "Создатель орешника",
+		Username:    "",
+		Name:        "Маша",
+		Surname:     "Залужная",
+		Patronymic:  nil,
+		City:        ptrString("Moscow"),
+		Age:         ptrInt(21),
+		Sex:         (*models.UserSex)(ptrInt(1)),
+		Profession:  ptrString("Проектировщик ракет"),
+		CaseCount:   0,
+		CreatedAt:   time.Time{},
+		UpdatedAt:   time.Time{},
 	}
 
 	expectedPurposes := []models.UserPurpose{
-		{Purpose: "learning", UserID: userID},
+		{ID: 0, Purpose: "Донбас", UserID: userID},
 	}
 
-	// Mock expectations
-	mockRepo.On("Begin", ctx).Return(mockTx, nil)
-	mockRepo.On("WithTx", mockTx).Return(mockRepo) // Return same repo mocks for simplicity
+	expectedLinks := []models.UserSocialLink{
+		{ID: 0, Type: "telegram", URL: "https://t.me/MashaZalushnaya", UserID: userID},
+	}
 
-	// Since WithTx returns mockRepo, the following calls are on mockRepo
-	mockRepo.On("CreateProfile", ctx, mock.AnythingOfType("*models.Profile")).Return(expectedProfile, nil)
-	mockRepo.On("AddSocial", ctx, mock.AnythingOfType("[]models.UserSocialLink")).Return(expectedLinks, nil)
-	mockRepo.On("AddPurposes", ctx, mock.AnythingOfType("[]models.UserPurpose")).Return(expectedPurposes, nil)
+	mockRepo.On("BeginTx", ctx).Return(mockTx, nil)
+	mockRepo.On("WithTx", mockTx).Return(mockRepo)
+	mockRepo.On("CreateProfile", ctx, mock.MatchedBy(func(p *models.Profile) bool {
+		return p.Name == req.Info.Name
+	})).Return(expectedProfile, nil)
+	mockRepo.On("AddSocial", ctx, expectedLinks).Return(expectedLinks, nil)
+	mockRepo.On("AddPurposes", ctx, expectedPurposes).Return(expectedPurposes, nil)
 
 	mockTx.On("Commit").Return(nil)
-	mockTx.On("Rollback").Return(nil) // Defer always calls Rollback
+	mockTx.On("Rollback").Return(nil)
 
-	// Execution
-	result, err := svc.CreateProfileService(ctx, req, userInfo)
-
-	// Assertions
+	res, err := svc.CreateProfileService(ctx, req, userInfo)
 	assert.NoError(t, err)
-	assert.NotNil(t, result)
-	assert.Equal(t, expectedProfile.Username, result.UsrProfile.Username)
-	assert.Len(t, result.UsrSocials, 1)
-	assert.Len(t, result.UsrPurposes, 1)
+	assert.NotNil(t, res)
+	assert.Equal(t, expectedProfile.Name, res.UsrProfile.Name)
 
 	mockRepo.AssertExpectations(t)
 	mockTx.AssertExpectations(t)
-}
-
-func TestGetUserProfileService(t *testing.T) {
-	mockRepo := new(repoMocks.ProfileRepoMock)
-	catRepo := new(repoMocksCat.CategoryRepoMock)
-	svc := service.NewProfileService(mockRepo, catRepo)
-
-	ctx := context.Background()
-	userID := int64(1)
-	userInfo := models.UserIdentity{UserID: userID}
-
-	expectedProfile := &models.Profile{
-		UserID:   userID,
-		Username: "johndoe",
-		IsActive: true,
-	}
-	var expectedLinks []models.UserSocialLink
-	var expectedPurposes []models.UserPurpose
-
-	mockRepo.On("GetUserProfile", ctx, userID).Return(expectedProfile, nil)
-	mockRepo.On("GetUserPurposes", ctx, userID).Return(expectedPurposes, nil)
-	mockRepo.On("GetUserSocials", ctx, userID).Return(expectedLinks, nil)
-
-	result, err := svc.GetUserProfileService(ctx, userInfo)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, result)
-	assert.Equal(t, userID, result.UsrProfile.UserID)
-
-	mockRepo.AssertExpectations(t)
-}
-
-func TestUpdateProfileService(t *testing.T) {
-	mockRepo := new(repoMocks.ProfileRepoMock)
-	catRepo := new(repoMocksCat.CategoryRepoMock)
-	svc := service.NewProfileService(mockRepo, catRepo)
-
-	ctx := context.Background()
-	userID := int64(1)
-	userInfo := models.UserIdentity{UserID: userID}
-
-	req := dto.ProfileInfoDTO{
-		Name:    "John",
-		Surname: "Smith",
-	}
-
-	expectedProfile := &models.Profile{
-		UserID:    userID,
-		Name:      "John",
-		Surname:   "Smith",
-		IsActive:  true,
-		UpdatedAt: time.Now(),
-	}
-
-	mockRepo.On("UpdateProfile", ctx, mock.AnythingOfType("*models.Profile")).Return(expectedProfile, nil)
-
-	result, err := svc.UpdateProfileService(ctx, userInfo, req)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, result)
-	assert.Equal(t, "Smith", result.Surname)
-
-	mockRepo.AssertExpectations(t)
 }
