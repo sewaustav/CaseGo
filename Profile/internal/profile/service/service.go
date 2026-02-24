@@ -29,6 +29,7 @@ type ProfileCore interface {
 	AddProfessionService(ctx context.Context, usr models.UserIdentity, req []dto.ProfessionDTO) ([]models.UserProfession, error)
 	EditProfessionCategoryService(ctx context.Context, usr models.UserIdentity, profession *models.UserProfession) (*models.UserProfession, error)
 	DeleteProfessionService(ctx context.Context, id int64, usr models.UserIdentity) error
+	GetProfessionsService(ctx context.Context, usr models.UserIdentity) ([]models.UserProfession, error)
 }
 
 type ProfileService struct {

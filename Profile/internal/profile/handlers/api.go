@@ -26,6 +26,7 @@ func (h *ProfileHandler) RegisterRoutes(rg *gin.RouterGroup, jwtMiddleWare *rs25
 		routers.DELETE("/purpose/:id", h.DeletePurposeHandler)
 
 		routers.POST("/profession", h.AddProfessionsHandler)
+		routers.GET("/profession", h.GetProfessionsHandler)
 		routers.PUT("/profession/:id", h.EditProfessionsHandler)
 		routers.DELETE("/profession/:id", h.DeleteProfessionsHandler)
 	}

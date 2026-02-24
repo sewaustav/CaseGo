@@ -89,3 +89,12 @@ func (s *ProfileService) DeleteProfessionService(ctx context.Context, id int64, 
 	return s.repo.DeleteProfession(ctx, id)
 
 }
+
+func (s *ProfileService) GetProfessionsService(ctx context.Context, usr models.UserIdentity) ([]models.UserProfession, error) {
+	listProfessions, err := s.repo.GetAllProfessions(ctx, usr.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get professions: %w", err)
+	}
+
+	return listProfessions, nil
+}

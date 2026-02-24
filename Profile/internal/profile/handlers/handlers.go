@@ -705,6 +705,28 @@ func (h *ProfileHandler) EditProfessionsHandler(c *gin.Context) {
 
 }
 
+func (h *ProfileHandler) GetProfessionsHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var userInfo models.UserIdentity
+	userInfo.Role = role
+	userInfo.UserID = userID
+
+	usersProfessions, err := h.service.GetProfessionsService(ctx, userInfo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get professions"})
+	}
+
+	c.JSON(http.StatusOK, usersProfessions)
+
+}
+
 // DeleteProfessionsHandler godoc
 // @Summary Удалить соц. ссылку
 // @Tags social

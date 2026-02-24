@@ -256,6 +256,36 @@ func (_m *ProfileCore) EditProfessionCategoryService(ctx context.Context, usr mo
 	return r0, r1
 }
 
+// GetProfessionsService provides a mock function with given fields: ctx, usr
+func (_m *ProfileCore) GetProfessionsService(ctx context.Context, usr models.UserIdentity) ([]models.UserProfession, error) {
+	ret := _m.Called(ctx, usr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetProfessionsService")
+	}
+
+	var r0 []models.UserProfession
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity) ([]models.UserProfession, error)); ok {
+		return rf(ctx, usr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity) []models.UserProfession); ok {
+		r0 = rf(ctx, usr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.UserProfession)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, models.UserIdentity) error); ok {
+		r1 = rf(ctx, usr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetUserProfileByIDService provides a mock function with given fields: ctx, usr, id
 func (_m *ProfileCore) GetUserProfileByIDService(ctx context.Context, usr models.UserIdentity, id int64) (*models.UserProfile, error) {
 	ret := _m.Called(ctx, usr, id)
