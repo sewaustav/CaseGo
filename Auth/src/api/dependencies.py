@@ -2,6 +2,7 @@ from typing import Annotated, Optional
 
 from fastapi import Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from Auth.src.services.google_validation import GoogleOAUTH
 from core.config import get_settings
 
 from models.user import User
@@ -18,6 +19,7 @@ from core.redis_client import RedisClient
 
 settings = get_settings()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/token")
+google_oauth = GoogleOAUTH(client_id=settings.GOOGLE_CLIENT_ID)
 
 
 # async def get_rabbitmq(request: Request) -> RabbitMQClient:

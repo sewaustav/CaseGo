@@ -24,7 +24,9 @@ class User(MyBaseModel):
 		nullable=False,
 		index=True
 	)
-	hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+	hashed_password: Mapped[str] = mapped_column(String(255), nullable=True)
+	
+	is_oauth: Mapped[bool] = mapped_column(Boolean, default=False)
 	
 	role: Mapped[int] = mapped_column(
         Integer, 

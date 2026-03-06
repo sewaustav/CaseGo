@@ -9,6 +9,7 @@ from repositories.user import create_user, get_user_by_email, get_user_by_userna
 
 
 async def register_user(body: UserRegister, db: AsyncSession) -> User:
+    	
     if await get_user_by_email(body.email, db):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     if await get_user_by_username(body.username, db):

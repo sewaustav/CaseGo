@@ -1,6 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+class AuthRequest(BaseModel):
+    id_token: str
 
 class TokenPair(BaseModel):
 	"""

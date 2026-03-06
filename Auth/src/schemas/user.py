@@ -1,3 +1,4 @@
+from typing_extensions import Optional
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 
@@ -10,7 +11,7 @@ class UserCreate(BaseModel):
 class UserRegister(BaseModel):
     username: str = Field(description="Имя пользователя")
     email: EmailStr = Field(description="Почта пользователя")
-    password: str
+    password: Optional[str]
 
 
 class UserResponse(BaseModel):

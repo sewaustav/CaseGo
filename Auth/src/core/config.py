@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     JWT_PUBLIC_KEY_PATH: Path = Path(BASE_DIR / "keys/public.pem")
     ACCESS_TOKEN_EXPIRE_SECONDS: int = Field(default=15)
     REFRESH_TOKEN_EXPIRE_SECONDS: int = Field(default=60)
+    GOOGLE_CLIENT_ID: str = Field(...)
 
     @property
     def postgres_async_url(self) -> str:
