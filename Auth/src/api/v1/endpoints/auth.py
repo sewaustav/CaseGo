@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 
 from schemas.token import TokenPair, RefreshTokenRequest, AuthRequest
 
-from Auth.src.repositories.user import get_user_by_login
+from repositories.user import get_user_by_login
 from ...dependencies import get_db_session, google_oauth
 from services.token import create_token_pair, refresh_access_token
 from fastapi.security import OAuth2PasswordRequestForm
@@ -28,10 +28,6 @@ async def google_auth(data: AuthRequest, db: Annotated[AsyncSession, Depends(get
 			detail="Invalid Google Token"
 		)
 
-	# Теперь у тебя есть данные юзера.
-	# user_data['sub'] — это уникальный ID пользователя в Google (не меняется)
-	# user_data['email'] — почта
-
 	user = UserRegister(
 		email=user_data['email'],
 		username=user_data['email'],
@@ -39,21 +35,11 @@ async def google_auth(data: AuthRequest, db: Annotated[AsyncSession, Depends(get
 	)
 
 	usr = await get_user_by_login(user_data['email'], db)
-	if usr is not None:
-		await register_user(user, db)
-	new_user = await authenticate_user(user_data['email'], db, None)
-	if user is None:
-		raise HTTPException(status_code=401, detail="user is none")
-	return new_user
+	if usr is None:
+		usr = await register_user(user, db)
+	tokens_data = create_token_pair(user_id=user.id, additional_data={"user_role": str(usr.role)})
+	return tokens_data
 
-	# return {
-	# 	"status": "ok",
-	# 	"user": {
-	# 		"email": user_data.get("email"),
-	# 		"name": user_data.get("name")
-	# 	},
-	# 	"message": "Welcome to the club, buddy"
-	# }
 
 @router.post("/register", response_model=UserResponse, status_code=201)
 async def register_user_endpoint(body: UserRegister, db: Annotated[AsyncSession, Depends(get_db_session)]):

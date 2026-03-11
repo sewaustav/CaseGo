@@ -23,9 +23,9 @@ def get_password_hash(password: str) -> str:
 
 
 # ======== Аутентификация ========
-async def authenticate_user(login: str, db: AsyncSession, password: str | None) -> Optional[User]:
+async def authenticate_user(login: str, db: AsyncSession, password: str) -> Optional[User]:
 	user = await get_user_by_login(login=login, db=db)
-	if password is not None and (not user or not verify_password(password, str(user.hashed_password))):
+	if not user or not verify_password(password, str(user.hashed_password)):
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
 			detail="Incorrect username/email or password",

@@ -2,7 +2,7 @@ from typing import Annotated, Optional
 
 from fastapi import Depends, status
 from fastapi.security import OAuth2PasswordBearer
-from Auth.src.services.google_validation import GoogleOAUTH
+from services.google_validation import GoogleOAUTH
 from core.config import get_settings
 
 from models.user import User

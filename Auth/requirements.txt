@@ -34,3 +34,4 @@ uvicorn==0.40.0
 authlib 
 httpx
 google-auth
+requests
