@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[AppState]:
 
     try:
         async with async_session_factory() as test_session:
-            result = await test_session.execute(text("SELECT 1"))
+            await test_session.execute(text("SELECT 1"))
             print("✓ Database connection successful", file=sys.stderr)
     except Exception as e:
         print(f"✗ Database connection failed: {e}", file=sys.stderr)
