@@ -1,4 +1,20 @@
 services:
+  alembic:
+    build: .
+    container_name: auth_alembic
+    command: alembic upgrade head
+    env_file:
+      - .env
+    volumes:
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auth_net
+    restart: on-failure
+
   fastapi:
     build: .
     container_name: auth_fastapi
@@ -12,6 +28,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - alembic
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=2)" ]
       timeout: 5s
