@@ -1,4 +1,3 @@
-import sys
 from passlib.context import CryptContext
 from typing import Optional
 
