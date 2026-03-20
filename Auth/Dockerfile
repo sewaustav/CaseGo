@@ -17,12 +17,9 @@ COPY --chown=python:python requirements.txt ./
 RUN pip install --user -r requirements.txt
 COPY --chown=python:python . .
 
-ENV PYTHONUNBUFFERED="true" \
+ENV PYTHONUNBUFFERED=1 \
   PYTHONPATH="/app:/app/src" \
-  UV_COMPILE_BYTECODE=1 \
-  UV_PROJECT_ENVIRONMENT="/home/python/.local" \
   PATH="${PATH}:/home/python/.local/bin" \
-  PYTHONUNBUFFERED=1 \
   USER="python"
 
 WORKDIR /app

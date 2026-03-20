@@ -67,6 +67,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=2)" ]
+      interval: 10s
       timeout: 5s
       start_period: 15s
       retries: 10
@@ -94,7 +95,7 @@ services:
   auth-redis:
     image: redis:8.2.1-alpine
     container_name: auth_redis
-    command: redis-server --requirepass redis_password
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     restart: unless-stopped
     ports:
       - "${REDIS_PORT_FORWARD}:6379"
@@ -103,7 +104,7 @@ services:
     volumes:
       - auth_redis_data:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: [ "CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping" ]
       interval: 10s
       timeout: 15s
       retries: 5
