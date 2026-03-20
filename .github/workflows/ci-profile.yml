@@ -1,0 +1,41 @@
+name: CI - Profile (Go)
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'Profile/**'
+      - '.github/workflows/ci-profile.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'Profile/**'
+      - '.github/workflows/ci-profile.yml'
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Profile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: Profile/go.mod
+          cache-dependency-path: Profile/go.sum
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./... -race -coverprofile=coverage.out
+
+      - name: Build
+        run: go build ./cmd/caseGo/...

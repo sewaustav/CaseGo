@@ -27,7 +27,7 @@ async def health_check(
 
 	# Проверка PostgreSQL
 	try:
-		result = await db.execute(text("SELECT 1"))
+		await db.execute(text("SELECT 1"))
 		await db.commit()
 		health_data["services"]["postgresql"] = {
 			"status": "healthy",
