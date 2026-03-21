@@ -2,7 +2,7 @@ name: CI - Profile (Go)
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop,'feature/**']
     paths:
       - 'Profile/**'
       - '.github/workflows/ci-profile.yml'
