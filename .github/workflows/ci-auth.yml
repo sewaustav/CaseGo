@@ -7,7 +7,7 @@ on:
       - 'Auth/**'
       - '.github/workflows/ci-auth.yml'
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'feature/**']
     paths:
       - 'Auth/**'
       - '.github/workflows/ci-auth.yml'
