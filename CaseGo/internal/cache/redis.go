@@ -72,3 +72,7 @@ func (r *redisRepo) DeleteLast(ctx context.Context, dialogID int64) error {
 func (r *redisRepo) Clear(ctx context.Context, dialogID int64) error {
 	return r.client.Del(ctx, r.makeKey(dialogID)).Err()
 }
+
+func (r *redisRepo) Close() error {
+	return r.client.Close()
+}
