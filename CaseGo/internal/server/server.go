@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/sewaustav/CaseGoCore/config"
+	"github.com/sewaustav/CaseGoCore/internal/api"
 	"github.com/sewaustav/CaseGoCore/internal/cache"
+	http_handlers "github.com/sewaustav/CaseGoCore/internal/cases/handlers/http"
 	"github.com/sewaustav/CaseGoCore/internal/cases/repository"
 	service "github.com/sewaustav/CaseGoCore/internal/cases/service/core"
 	"github.com/sewaustav/CaseGoCore/internal/cases/service/llm_service"
@@ -13,8 +15,9 @@ import (
 )
 
 type Server struct {
-	DB   *db.DataBase
-	HTTP *http.Server
+	DB    *db.DataBase
+	HTTP  *http.Server
+	Redis cache.Interactor
 }
 
 func New() (*Server, error) {
@@ -45,4 +48,19 @@ func New() (*Server, error) {
 	caseGoService := service.NewCaseGoCoreService(redisClient, caseGoRepo, dialogRepo, interactionsRepo, llmService)
 
 	jwtMiddleware := rs256.New(conf.PublicKey, "auth", "all")
+
+	httpHandler := http_handlers.NewCaseGoHttpHandler(caseGoService)
+
+	httpRoutes := api.SetupRoutes(httpHandler, jwtMiddleware)
+
+	srv := &http.Server{
+		Addr:    "8081",
+		Handler: httpRoutes,
+	}
+
+	return &Server{
+		DB:    database,
+		HTTP:  srv,
+		Redis: redisClient,
+	}, nil
 }

@@ -38,29 +38,27 @@ func (s *CaseGoCoreService) GetCaseByIDService(ctx context.Context, caseID int64
 	return caseModel, nil
 }
 
-func (s *CaseGoCoreService) CreateCaseService(ctx context.Context, caseDto *dto.NewCaseDto, prompt *string, user models.UserIdentity) (*models.Case, error) {
+func (s *CaseGoCoreService) CreateCaseService(ctx context.Context, caseDto *dto.NewCaseDto, user models.UserIdentity) (*models.Case, error) {
 	if user.Role == models.Admin || user.Role == models.Creator {
-		if prompt != nil {
-			newCase, err := s.llmService.GenerateCase(ctx, *prompt)
-			if err != nil {
-				return nil, err
-			}
-			return newCase, nil
-		} else if caseDto != nil {
-			newCase, err := s.caseGoRepo.CreateCase(ctx, &models.Case{
-				Topic:         caseDto.Topic,
-				Description:   caseDto.Description,
-				Category:      caseDto.Category,
-				IsGenerated:   false,
-				FirstQuestion: caseDto.FirstQuestion,
-				Creator:       user.UserID,
-			})
+		if caseDto.Prompt != nil {
+			newCase, err := s.llmService.GenerateCase(ctx, *caseDto.Prompt)
 			if err != nil {
 				return nil, err
 			}
 			return newCase, nil
 		}
-		return nil, errors.New("prompt or caseDto is required")
+		newCase, err := s.caseGoRepo.CreateCase(ctx, &models.Case{
+			Topic:         *caseDto.Topic,
+			Description:   *caseDto.Description,
+			Category:      *caseDto.Category,
+			IsGenerated:   false,
+			FirstQuestion: *caseDto.FirstQuestion,
+			Creator:       user.UserID,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return newCase, nil
 
 	}
 
@@ -84,11 +82,11 @@ func (s *CaseGoCoreService) PatchCaseService(ctx context.Context, caseID int64, 
 	}
 	return s.caseGoRepo.PatchCase(ctx, &models.Case{
 		ID:            caseID,
-		Topic:         caseDto.Topic,
-		Description:   caseDto.Description,
-		Category:      caseDto.Category,
+		Topic:         *caseDto.Topic,
+		Description:   *caseDto.Description,
+		Category:      *caseDto.Category,
 		IsGenerated:   false,
-		FirstQuestion: caseDto.FirstQuestion,
+		FirstQuestion: *caseDto.FirstQuestion,
 		Creator:       user.UserID,
 	})
 }

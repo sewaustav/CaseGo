@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
@@ -27,7 +28,16 @@ func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64
 	return caseModel, nil
 }
 
-func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto) (*dto.CaseDto, error) {
+func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto, user models.UserIdentity) (*dto.CaseDto, error) {
+	dialog, err := s.dialogRepo.GetDialogByID(ctx, interaction.DialogID)
+	if err != nil {
+		return nil, err
+	}
+
+	if dialog.UserID != user.UserID {
+		return nil, errors.New("user not authorized to interact with this dialog")
+	}
+
 	interactionModel := &models.Interaction{
 		DialogID:  interaction.DialogID,
 		Step:      interaction.Step,
@@ -59,18 +69,21 @@ func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, intera
 	}, nil
 }
 
-func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) error {
+func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.Result, error) {
+	analysis := make(chan *dto.Result, 1)
+	errChan := make(chan error, 1)
+
 	dialog, err := s.dialogRepo.GetDialogByID(ctx, dialogID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if dialog.UserID != user.UserID {
-		return errors.New("user is not owner of dialog")
+		return nil, errors.New("user is not owner of dialog")
 	}
 
 	tx, err := s.interactionRepo.Begin(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer tx.Rollback()
@@ -79,29 +92,48 @@ func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID 
 
 	dialogHistory, err := s.redisClient.GetFullHistory(ctx, dialogID)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	go func() {
+		result, err := s.llmService.AnalyzeCase(ctx, dialogHistory)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		analysis <- result
+	}()
 
 	for _, interaction := range dialogHistory {
 		if err := txRepo.PutInteraction(ctx, &interaction); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := s.redisClient.Clear(ctx, dialogID); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	select {
+	case result := <-analysis:
+		return result, nil
+	case err := <-errChan:
+		return nil, fmt.Errorf("analysis failed: %w", err)
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 }
 
+func (s *CaseGoCoreService) GetUsersDialogsService(ctx context.Context, user models.UserIdentity, userID int64, limit, offset int) ([]models.Conversation, error) {
+	if userID != user.UserID && user.Role != models.Admin {
+		return nil, errors.New("only admin or owner can get user dialogs")
+	}
 
-func (s *CaseGoCoreService) GetUsersDialogsService(ctx context.Context, user models.UserIdentity, limit, offset int) ([]models.Conversation, error) {
-	dialogs, err :=  s.dialogRepo.GetUserDialogs(ctx, user.UserID, limit, offset)
+	dialogs, err := s.dialogRepo.GetUserDialogs(ctx, userID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -110,9 +142,6 @@ func (s *CaseGoCoreService) GetUsersDialogsService(ctx context.Context, user mod
 			return nil, errors.New("only admin can get user dialogs")
 		}
 		return nil, nil
-	}
-	if dialogs[0].UserID != user.UserID && user.Role != models.Admin {
-		return nil, errors.New("only admin or owner can get user dialogs")
 	}
 
 	var conversations []models.Conversation
@@ -126,12 +155,12 @@ func (s *CaseGoCoreService) GetUsersDialogsService(ctx context.Context, user mod
 			history, err = s.interactionRepo.GetInteractionsByDialogID(ctx, dialog.ID)
 		}
 		conversations = append(conversations, models.Conversation{
-			Dialog: dialog,
+			Dialog:       dialog,
 			Interactions: history,
 		})
 	}
 	return conversations, nil
-	
+
 }
 
 func (s *CaseGoCoreService) GetUserDialogByIDService(ctx context.Context, user models.UserIdentity, dialogID int64) (*models.Conversation, error) {
@@ -139,7 +168,7 @@ func (s *CaseGoCoreService) GetUserDialogByIDService(ctx context.Context, user m
 	if err != nil {
 		return nil, err
 	}
-	if dialog.UserID != user.UserID && user.Role != models.Admin  {
+	if dialog.UserID != user.UserID && user.Role != models.Admin {
 		return nil, errors.New("only admin or owner can get user dialogs")
 	}
 
@@ -154,7 +183,7 @@ func (s *CaseGoCoreService) GetUserDialogByIDService(ctx context.Context, user m
 		}
 	}
 	return &models.Conversation{
-		Dialog: *dialog,
+		Dialog:       *dialog,
 		Interactions: history,
 	}, nil
 
