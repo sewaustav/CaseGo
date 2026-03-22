@@ -21,16 +21,25 @@ type CaseDto struct {
 }
 
 type NewCaseDto struct {
-	Topic         string `json:"topic"`
-	Category      int32  `json:"category"`
-	Description   string `json:"description"`
-	FirstQuestion string `json:"first_question"`
+	Topic         *string `json:"topic" validate:"excluded_with=Prompt"`
+	Category      *int32  `json:"category" validate:"excluded_with=Prompt"`
+	Description   *string `json:"description" validate:"excluded_with=Prompt"`
+	FirstQuestion *string `json:"first_question" validate:"excluded_with=Prompt"`
+
+	Prompt *string `json:"prompt" validate:"required_without_all=Topic Category Description FirstQuestion"`
 }
 
 type UserSettingsDto struct {
 	Topic    *string `json:"topic"`
 	Category *int32  `json:"category"`
 	Model    *string `json:"model"`
+}
+
+type GetCasesDto struct {
+	Limit    int     `json:"limit" form:"limit"`
+	Page     int     `json:"page" form:"page"`
+	Topic    *string `json:"topic" form:"topic"`
+	Category *int32  `json:"category" form:"category"`
 }
 
 type Skills struct {
