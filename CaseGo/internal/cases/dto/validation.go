@@ -20,8 +20,17 @@ type CaseDto struct {
 	Step     *int32 `json:"step"`
 }
 
+type NewCaseDto struct {
+	Topic         string `json:"topic"`
+	Category      int32  `json:"category"`
+	Description   string `json:"description"`
+	FirstQuestion string `json:"first_question"`
+}
+
 type UserSettingsDto struct {
-	Model string `json:"model"`
+	Topic    *string `json:"topic"`
+	Category *int32  `json:"category"`
+	Model    *string `json:"model"`
 }
 
 type Skills struct {

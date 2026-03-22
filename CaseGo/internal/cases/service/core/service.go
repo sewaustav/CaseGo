@@ -11,8 +11,21 @@ import (
 )
 
 type CaseGoService interface {
-	StartDialog(ctx context.Context, caseID int64, user models.UserIdentity) (*models.Case, error)
-	HandleInteraction(ctx context.Context, interaction *dto.InteractionDto) (*dto.CaseDto, error)
+	StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*models.Case, error)
+	HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto) (*dto.CaseDto, error)
+	CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) error
+
+	GetCasesService(ctx context.Context, limit, page int, settings *dto.UserSettingsDto) ([]models.Case, error)
+	GetCaseByIDService(ctx context.Context, caseID int64) (*models.Case, error)
+
+	// admin only
+	CreateCaseService(ctx context.Context, caseDto *dto.NewCaseDto, prompt *string, identity models.UserIdentity) (*models.Case, error)
+	DeleteCaseService(ctx context.Context, caseID int64, user models.UserIdentity) error
+	PatchCaseService(ctx context.Context, caseID int64, caseDto *dto.NewCaseDto, user models.UserIdentity) (*models.Case, error)
+
+	//users
+	GetUsersDialogsService(ctx context.Context, user models.UserIdentity, limit, offset int) ([]models.Conversation, error)
+	GetUserDialogByIDService(ctx context.Context, user models.UserIdentity, dialogID int64) (*models.Conversation, error)
 }
 
 type CaseGoCoreService struct {
