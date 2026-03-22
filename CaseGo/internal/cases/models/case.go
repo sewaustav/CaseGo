@@ -31,7 +31,7 @@ type Dialog struct {
 	CaseID    int64      `json:"case_id" db:"case_id"`
 	UserID    int64      `json:"user_id" db:"user_id"`
 	ModelName *string    `json:"model_name" db:"model_name"`
-	StartedAt time.Time  `json:"started_at" db:"started_at"`
+	StartedAt *time.Time `json:"started_at" db:"started_at"`
 	EndedAt   *time.Time `json:"ended_at" db:"ended_at"`
 }
 
@@ -59,4 +59,9 @@ type Result struct {
 	Resistance           float64   `json:"resistance" db:"resistance"`
 	Eloquence            float64   `json:"eloquence" db:"eloquence"`
 	Initiative           float64   `json:"initiative" db:"initiative"`
+}
+
+type Conversation struct {
+	Dialog       Dialog
+	Interactions []Interaction
 }
