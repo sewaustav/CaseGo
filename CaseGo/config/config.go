@@ -25,6 +25,8 @@ type Config struct {
 
 	LLMURL string
 
+	GRPCSEVER string
+
 	PublicKey *rsa.PublicKey
 }
 
@@ -63,6 +65,7 @@ func LoadConfig() *Config {
 		RedisPort:     redisPort,
 		RedisPassword: os.Getenv("REDIS_PASSWORD"),
 		LLMURL:        os.Getenv("LLM_URL"),
+		GRPCSEVER:     os.Getenv("GRPC_SEVER"),
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/sewaustav/CaseGoCore/config"
 	"github.com/sewaustav/CaseGoCore/internal/api"
 	"github.com/sewaustav/CaseGoCore/internal/cache"
+	"github.com/sewaustav/CaseGoCore/internal/cases/handlers/grpc"
 	http_handlers "github.com/sewaustav/CaseGoCore/internal/cases/handlers/http"
 	"github.com/sewaustav/CaseGoCore/internal/cases/repository"
 	service "github.com/sewaustav/CaseGoCore/internal/cases/service/core"
@@ -45,7 +46,12 @@ func New() (*Server, error) {
 
 	llmService := llm_service.NewLLMService(conf.LLMURL)
 
-	caseGoService := service.NewCaseGoCoreService(redisClient, caseGoRepo, dialogRepo, interactionsRepo, llmService)
+	grpsClient, err := grpc.NewCaseGoGRPC(conf.GRPCSEVER)
+	if err != nil {
+		return nil, err
+	}
+
+	caseGoService := service.NewCaseGoCoreService(redisClient, caseGoRepo, dialogRepo, interactionsRepo, llmService, grpsClient)
 
 	jwtMiddleware := rs256.New(conf.PublicKey, "auth", "all")
 

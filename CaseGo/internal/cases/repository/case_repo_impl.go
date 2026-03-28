@@ -22,7 +22,7 @@ func NewPostgresCaseRepo(db *sql.DB) *PostgresCaseRepo {
 func (r *PostgresCaseRepo) CreateCase(ctx context.Context, caseCopy *models.Case) (*models.Case, error) {
 	query := psql.
 		Insert("cases").
-		Columns("topic", "category", "is_generated", "description", "first_question", "creator", "created_at").
+		Columns("topic", "category", "is_generated", "description", "first_question", "creator").
 		Values(
 			caseCopy.Topic,
 			caseCopy.Category,
@@ -30,9 +30,8 @@ func (r *PostgresCaseRepo) CreateCase(ctx context.Context, caseCopy *models.Case
 			caseCopy.Description,
 			caseCopy.FirstQuestion,
 			caseCopy.Creator,
-			caseCopy.CreatedAt,
 		).
-		Suffix("RETURNING id")
+		Suffix("RETURNING topic, category, is_generated, description, first_question, creator, id, created_at")
 
 	sqlStr, args, err := query.ToSql()
 	if err != nil {

@@ -21,9 +21,9 @@ func NewPostgresDialogRepo(db *sql.DB) *PostgresDialogRepo {
 func (r *PostgresDialogRepo) StartDialog(ctx context.Context, dialog *models.Dialog) (*models.Dialog, error) {
 	query := psql.
 		Insert("dialogs").
-		Columns("case_id", "user_id", "model_name", "started_at", "ended_at").
-		Values(dialog.CaseID, dialog.UserID, dialog.ModelName, dialog.StartedAt, dialog.EndedAt).
-		Suffix("RETURNING id")
+		Columns("case_id", "user_id", "model_name").
+		Values(dialog.CaseID, dialog.UserID, dialog.ModelName).
+		Suffix("RETURNING case_id, user_id, model_name, started_at")
 
 	sqlStr, args, err := query.ToSql()
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/sewaustav/CaseGoCore/internal/cache"
 	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
+	"github.com/sewaustav/CaseGoCore/internal/cases/handlers/grpc"
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
 	"github.com/sewaustav/CaseGoCore/internal/cases/repository"
 	"github.com/sewaustav/CaseGoCore/internal/cases/service/llm_service"
@@ -34,14 +35,16 @@ type CaseGoCoreService struct {
 	dialogRepo      repository.DialogRepo
 	interactionRepo repository.Interaction
 	llmService      llm_service.LLM
+	grpcHandler     grpc.GRPCService
 }
 
-func NewCaseGoCoreService(redisClient cache.Interactor, caseGoRepo repository.CaseRepo, dialogRepo repository.DialogRepo, interactionRepo repository.Interaction, llm_service llm_service.LLM) *CaseGoCoreService {
+func NewCaseGoCoreService(redisClient cache.Interactor, caseGoRepo repository.CaseRepo, dialogRepo repository.DialogRepo, interactionRepo repository.Interaction, llm_service llm_service.LLM, grpc grpc.GRPCService) *CaseGoCoreService {
 	return &CaseGoCoreService{
 		redisClient:     redisClient,
 		caseGoRepo:      caseGoRepo,
 		dialogRepo:      dialogRepo,
 		interactionRepo: interactionRepo,
 		llmService:      llm_service,
+		grpcHandler:     grpc,
 	}
 }
