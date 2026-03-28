@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
@@ -120,12 +121,35 @@ func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID 
 
 	select {
 	case result := <-analysis:
+		go func(r *dto.Result) {
+			result := &models.Result{
+				UserID:       user.UserID,
+				CaseID:       dialog.CaseID,
+				DialogID:     dialogID,
+				StepsCount: r.StepsCount,
+				FinishedAt:   time.Now(),
+				Assertiveness: r.SkillsRating.Assertiveness,
+				Empathy: r.SkillsRating.Empathy,
+				ClarityCommunication: r.SkillsRating.ClarityCommunication,
+				Resistance: r.SkillsRating.Resistance,
+				Eloquence: r.SkillsRating.Eloquence,
+				Initiative: r.SkillsRating.Initiative,
+			}
+
+			if err := s.grpcHandler.SendResults(context.Background(), *result); err != nil {
+				log.Printf("failed to send grpc results: %v", err)
+			}
+		}(result)
+
 		return result, nil
+
 	case err := <-errChan:
-		return nil, fmt.Errorf("analysis failed: %w", err)
+		return nil, fmt.Errorf("process failed: %w", err)
+
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
+
 }
 
 func (s *CaseGoCoreService) GetUsersDialogsService(ctx context.Context, user models.UserIdentity, userID int64, limit, offset int) ([]models.Conversation, error) {

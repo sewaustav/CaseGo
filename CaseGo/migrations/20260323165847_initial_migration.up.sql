@@ -16,7 +16,7 @@ CREATE TABLE dialogs (
                          case_id BIGINT NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
                          user_id BIGINT NOT NULL,
                          model_name VARCHAR(255),
-                         started_at TIMESTAMP WITH TIME ZONE,
+                         started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                          ended_at TIMESTAMP WITH TIME ZONE
 );
 
