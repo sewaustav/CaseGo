@@ -3,6 +3,7 @@ package llm_service
 import (
 	"context"
 
+	"github.com/sashabaranov/go-openai"
 	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
 )
@@ -14,7 +15,8 @@ type LLM interface {
 }
 
 type LLMService struct {
-	URL string
+	URL    string
+	client *openai.Client
 }
 
 func NewLLMService(url string) *LLMService {
