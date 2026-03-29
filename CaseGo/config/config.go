@@ -27,7 +27,8 @@ type Config struct {
 
 	GRPCSEVER string
 
-	PublicKey *rsa.PublicKey
+	PrivateKey *rsa.PrivateKey
+	PublicKey  *rsa.PublicKey
 }
 
 func LoadConfig() *Config {
@@ -41,6 +42,16 @@ func LoadConfig() *Config {
 	publicKey, err := ParseRSAPublicKey(publicKeyStr)
 	if err != nil {
 		log.Fatal(publicKeyStr)
+	}
+
+	privateKeyStr := os.Getenv("PRIVATE_KEY")
+	if privateKeyStr == "" {
+		panic("PRIVATE_KEY environment variable not set")
+	}
+
+	privateKey, err := ParseRSAPrivateKey(privateKeyStr)
+	if err != nil {
+		log.Fatal("Failed to parse PRIVATE_KEY")
 	}
 
 	dbPortStr := os.Getenv("POSTGRES_PORT")
@@ -61,6 +72,7 @@ func LoadConfig() *Config {
 		DBPassword:    os.Getenv("POSTGRES_PASSWORD"),
 		DBPort:        dbPort,
 		PublicKey:     publicKey,
+		PrivateKey:    privateKey,
 		RedisHost:     os.Getenv("REDIS_HOST"),
 		RedisPort:     redisPort,
 		RedisPassword: os.Getenv("REDIS_PASSWORD"),
@@ -85,5 +97,27 @@ func ParseRSAPublicKey(pemStr string) (*rsa.PublicKey, error) {
 		return pub, nil
 	default:
 		return nil, errors.New("unknown type of public key")
+	}
+}
+
+func ParseRSAPrivateKey(pemStr string) (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode([]byte(pemStr))
+	if block == nil {
+		return nil, errors.New("failed to parse PEM block containing the private key")
+	}
+
+	if key, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
+		return key, nil
+	}
+	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	switch key := key.(type) {
+	case *rsa.PrivateKey:
+		return key, nil
+	default:
+		return nil, errors.New("unknown type of private key")
 	}
 }

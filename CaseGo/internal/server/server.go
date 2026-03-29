@@ -12,6 +12,7 @@ import (
 	service "github.com/sewaustav/CaseGoCore/internal/cases/service/core"
 	"github.com/sewaustav/CaseGoCore/internal/cases/service/llm_service"
 	"github.com/sewaustav/CaseGoCore/internal/db"
+	tk "github.com/sewaustav/CaseGoCore/internal/jwt"
 	"github.com/sewaustav/CaseGoCore/pkg/middleware/rs256"
 )
 
@@ -46,7 +47,9 @@ func New() (*Server, error) {
 
 	llmService := llm_service.NewLLMService(conf.LLMURL)
 
-	grpsClient, err := grpc.NewCaseGoGRPC(conf.GRPCSEVER)
+	tokenService := tk.NewToken(conf.PrivateKey)
+
+	grpsClient, err := grpc.NewCaseGoGRPC(conf.GRPCSEVER, tokenService)
 	if err != nil {
 		return nil, err
 	}
