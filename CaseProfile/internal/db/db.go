@@ -14,11 +14,11 @@ type DataBase struct {
 func (d *DataBase) Open(dbName, dbUser, dbPassword, dbHost string, dbPort int) error {
 
 	psqlInfo := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
-		dbHost, 
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		dbHost,
 		dbPort,
-		dbUser, 
-		dbPassword, 
+		dbUser,
+		dbPassword,
 		dbName,
 	)
 
@@ -36,7 +36,7 @@ func (d *DataBase) Open(dbName, dbUser, dbPassword, dbHost string, dbPort int) e
 		return err
 	}
 
-	d.db = db  
+	d.db = db
 
 	return nil
 }
