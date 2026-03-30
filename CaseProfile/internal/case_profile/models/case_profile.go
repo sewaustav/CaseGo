@@ -2,6 +2,19 @@ package models
 
 import "time"
 
+type UserRole int
+
+const (
+	Admin UserRole = iota
+	User
+	Creator
+)
+
+type UserIdentity struct {
+	UserID int64
+	Role   UserRole
+}
+
 type CaseProfile struct {
 	ID                   int64   `json:"id" db:"id"`
 	UserID               int64   `json:"user_id" db:"user_id"`

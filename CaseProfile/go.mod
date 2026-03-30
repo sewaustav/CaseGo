@@ -5,8 +5,10 @@ go 1.26.1
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.12.0
 	github.com/sewaustav/CaseGogRPServer v0.0.0-20260328220114-77ccc5e550c7
+	google.golang.org/grpc v1.79.3
 )
 
 require (
@@ -39,6 +41,5 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
