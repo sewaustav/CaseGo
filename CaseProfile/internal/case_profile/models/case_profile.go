@@ -36,5 +36,5 @@ type CaseProfileHistory struct {
 	Resistance           float64   `json:"resistance" db:"resistance"`
 	Eloquence            float64   `json:"eloquence" db:"eloquence"`
 	Initiative           float64   `json:"initiative" db:"initiative"`
-	Date                 time.Time `json:"date" db:"date"`
+	Date                 time.Time `json:"actual_date" db:"actual_date"`
 }
