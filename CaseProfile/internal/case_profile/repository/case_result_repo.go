@@ -3,13 +3,19 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/models"
 )
 
 type CaseResultRepo interface {
-	AddResult(ctx context.Context, result *models.CaseProfile) error
+	UpdateProfile(ctx context.Context, result *models.CaseProfile) error
+	StoreProfile(ctx context.Context, result *models.CaseProfile) error
+	AddResult(ctx context.Context, result *models.CaseResult) error
+	GetResultByDialogID(ctx context.Context, dialogID int64) (*models.CaseResult, error)
 	GetProfileByUserID(ctx context.Context, userID int64) (*models.CaseProfile, error)
 	GetProfileByID(ctx context.Context, id int64) (*models.CaseProfile, error)
 	GetHistoryBy(ctx context.Context, userID int64, from time.Time) ([]*models.CaseProfileHistory, error)
@@ -24,27 +30,169 @@ func NewPostgresCaseResultRepo(db *sql.DB) CaseResultRepo {
 	return &PostgresCaseResultRepo{db: db}
 }
 
-func (p PostgresCaseResultRepo) AddResult(ctx context.Context, result *models.CaseProfile) error {
-	//TODO implement me
-	panic("implement me")
+var psql = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+
+func (p *PostgresCaseResultRepo) UpdateProfile(ctx context.Context, result *models.CaseProfile) error {
+	query, args, err := psql.
+		Insert("case_profiles").
+		Columns("user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative").
+		Values(result.UserID, result.TotalCases, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative).
+		Suffix("ON CONFLICT (user_id) DO UPDATE SET total_cases = EXCLUDED.total_cases, assertiveness = EXCLUDED.assertiveness, empathy = EXCLUDED.empathy, clarity_communication = EXCLUDED.clarity_communication, resistance = EXCLUDED.resistance, eloquence = EXCLUDED.eloquence, initiative = EXCLUDED.initiative").
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
 }
 
-func (p PostgresCaseResultRepo) GetProfileByUserID(ctx context.Context, userID int64) (*models.CaseProfile, error) {
-	//TODO implement me
-	panic("implement me")
+func (p *PostgresCaseResultRepo) StoreProfile(ctx context.Context, result *models.CaseProfile) error {
+	query, args, err := psql.
+		Insert("case_profiles_hystories").
+		Columns("user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
+		Values(result.UserID, result.TotalCases, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
 }
 
-func (p PostgresCaseResultRepo) GetProfileByID(ctx context.Context, id int64) (*models.CaseProfile, error) {
-	//TODO implement me
-	panic("implement me")
+func (p *PostgresCaseResultRepo) AddResult(ctx context.Context, result *models.CaseResult) error {
+	query, args, err := psql.
+		Insert("case_profile_results").
+		Columns("user_id", "case_id", "dialog_id", "steps_count", "tokens_used", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative").
+		Values(result.UserID, result.CaseID, result.DialogID, result.StepsCount, result.TokensUsed, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
 }
 
-func (p PostgresCaseResultRepo) GetHistoryBy(ctx context.Context, userID int64, from time.Time) ([]*models.CaseProfileHistory, error) {
-	//TODO implement me
-	panic("implement me")
+func (p *PostgresCaseResultRepo) GetResultByDialogID(ctx context.Context, dialogID int64) (*models.CaseResult, error) {
+	query, args, err := psql.
+		Select("id", "user_id", "case_id", "dialog_id", "steps_count", "tokens_used", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative").
+		From("case_profile_results").
+		Where(sq.Eq{"dialog_id": dialogID}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+	result := &models.CaseResult{}
+	err = p.db.QueryRowContext(ctx, query, args...).Scan(
+		&result.ID, &result.UserID, &result.CaseID, &result.DialogID, &result.StepsCount, &result.TokensUsed,
+		&result.Assertiveness, &result.Empathy, &result.ClarityCommunication, &result.Resistance, &result.Eloquence, &result.Initiative,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	return result, nil
 }
 
-func (p PostgresCaseResultRepo) DeleteResultByID(ctx context.Context, id int64) error {
-	//TODO implement me
-	panic("implement me")
+func (p *PostgresCaseResultRepo) GetProfileByUserID(ctx context.Context, userID int64) (*models.CaseProfile, error) {
+	query, args, err := psql.
+		Select("id", "user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative").
+		From("case_profiles").
+		Where(sq.Eq{"user_id": userID}).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to build select query: %w", err)
+	}
+
+	profile := &models.CaseProfile{}
+	err = p.db.QueryRowContext(ctx, query, args...).Scan(
+		&profile.ID, &profile.UserID, &profile.TotalCases,
+		&profile.Assertiveness, &profile.Empathy, &profile.ClarityCommunication,
+		&profile.Resistance, &profile.Eloquence, &profile.Initiative,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan profile: %w", err)
+	}
+
+	return profile, nil
+}
+
+func (p *PostgresCaseResultRepo) GetProfileByID(ctx context.Context, id int64) (*models.CaseProfile, error) {
+	query, args, err := psql.
+		Select("id", "user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative").
+		From("case_profiles").
+		Where(sq.Eq{"id": id}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	profile := &models.CaseProfile{}
+	err = p.db.QueryRowContext(ctx, query, args...).Scan(
+		&profile.ID, &profile.UserID, &profile.TotalCases,
+		&profile.Assertiveness, &profile.Empathy, &profile.ClarityCommunication,
+		&profile.Resistance, &profile.Eloquence, &profile.Initiative,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, nil
+}
+
+func (p *PostgresCaseResultRepo) GetHistoryBy(ctx context.Context, userID int64, from time.Time) ([]*models.CaseProfileHistory, error) {
+	query, args, err := psql.
+		Select("id", "user_id", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
+		From("case_profiles_hystories").
+		Where(sq.Eq{"user_id": userID}).
+		Where(sq.GtOrEq{"actual_date": from}).
+		OrderBy("actual_date DESC").
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := p.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var result []*models.CaseProfileHistory
+	for rows.Next() {
+		var profile models.CaseProfileHistory
+		if err := rows.Scan(
+			&profile.ID, &profile.UserID,
+			&profile.Assertiveness, &profile.Empathy, &profile.ClarityCommunication,
+			&profile.Resistance, &profile.Eloquence, &profile.Initiative, &profile.Date,
+		); err != nil {
+			return nil, err
+		}
+		result = append(result, &profile)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (p *PostgresCaseResultRepo) DeleteResultByID(ctx context.Context, id int64) error {
+	query, args, err := psql.
+		Delete("case_profile_histories").
+		Where(sq.Eq{"id": id}).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
 }
