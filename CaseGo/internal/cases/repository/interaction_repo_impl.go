@@ -3,9 +3,11 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/sewaustav/CaseGoCore/apperrors"
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
 )
 
@@ -28,12 +30,12 @@ func (r *PostgresInteractionRepo) current() DBTX {
 func (r *PostgresInteractionRepo) Begin(ctx context.Context) (Tx, error) {
 	base, ok := r.db.(*sql.DB)
 	if !ok {
-		return nil, fmt.Errorf("begin is available only on *sql.DB")
+		return nil, fmt.Errorf("begin: underlying db is not *sql.DB")
 	}
 
 	tx, err := base.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("begin tx: %w", err)
 	}
 
 	return tx, nil
@@ -55,10 +57,14 @@ func (r *PostgresInteractionRepo) PutInteraction(ctx context.Context, interactio
 
 	sqlStr, args, err := query.ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("put interaction: build query: %w", err)
 	}
 
-	return r.current().QueryRowContext(ctx, sqlStr, args...).Scan(&interaction.ID)
+	if err := r.current().QueryRowContext(ctx, sqlStr, args...).Scan(&interaction.ID); err != nil {
+		return fmt.Errorf("put interaction: exec: %w", err)
+	}
+
+	return nil
 }
 
 func (r *PostgresInteractionRepo) GetInteractionByID(ctx context.Context, interactionID int64) (*models.Interaction, error) {
@@ -69,7 +75,7 @@ func (r *PostgresInteractionRepo) GetInteractionByID(ctx context.Context, intera
 
 	sqlStr, args, err := query.ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get interaction by id: build query: %w", err)
 	}
 
 	var i models.Interaction
@@ -82,7 +88,10 @@ func (r *PostgresInteractionRepo) GetInteractionByID(ctx context.Context, intera
 		&i.TokensUsed,
 		&i.CreatedAt,
 	); err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("interaction id=%d: %w", interactionID, apperrors.ErrNotFound)
+		}
+		return nil, fmt.Errorf("get interaction by id: scan: %w", err)
 	}
 
 	return &i, nil
@@ -97,12 +106,12 @@ func (r *PostgresInteractionRepo) GetInteractionsByDialogID(ctx context.Context,
 
 	sqlStr, args, err := query.ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get interactions by dialog id: build query: %w", err)
 	}
 
 	rows, err := r.current().QueryContext(ctx, sqlStr, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get interactions by dialog id: query: %w", err)
 	}
 	defer rows.Close()
 
@@ -118,13 +127,13 @@ func (r *PostgresInteractionRepo) GetInteractionsByDialogID(ctx context.Context,
 			&i.TokensUsed,
 			&i.CreatedAt,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("get interactions by dialog id: scan: %w", err)
 		}
 		res = append(res, i)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get interactions by dialog id: rows iteration: %w", err)
 	}
 
 	return res, nil
