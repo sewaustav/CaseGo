@@ -63,7 +63,7 @@ func New() (*Server, error) {
 	httpRoutes := api.SetupRoutes(httpHandler, jwtMiddleware)
 
 	srv := &http.Server{
-		Addr:    "8081",
+		Addr:    ":8081",
 		Handler: httpRoutes,
 	}
 
