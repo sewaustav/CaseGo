@@ -8,6 +8,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/sewaustav/CaseGoProfile/apperrors"
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/models"
 )
 
@@ -40,10 +41,15 @@ func (p *PostgresCaseResultRepo) UpdateProfile(ctx context.Context, result *mode
 		Suffix("ON CONFLICT (user_id) DO UPDATE SET total_cases = EXCLUDED.total_cases, assertiveness = EXCLUDED.assertiveness, empathy = EXCLUDED.empathy, clarity_communication = EXCLUDED.clarity_communication, resistance = EXCLUDED.resistance, eloquence = EXCLUDED.eloquence, initiative = EXCLUDED.initiative").
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("update profile: build query: %w", err)
 	}
+
 	_, err = p.db.ExecContext(ctx, query, args...)
-	return err
+	if err != nil {
+		return fmt.Errorf("update profile: exec: %w", err)
+	}
+
+	return nil
 }
 
 func (p *PostgresCaseResultRepo) StoreProfile(ctx context.Context, result *models.CaseProfile) error {
@@ -53,10 +59,15 @@ func (p *PostgresCaseResultRepo) StoreProfile(ctx context.Context, result *model
 		Values(result.UserID, result.TotalCases, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("store profile history: build query: %w", err)
 	}
+
 	_, err = p.db.ExecContext(ctx, query, args...)
-	return err
+	if err != nil {
+		return fmt.Errorf("store profile history: exec: %w", err)
+	}
+
+	return nil
 }
 
 func (p *PostgresCaseResultRepo) AddResult(ctx context.Context, result *models.CaseResult) error {
@@ -66,10 +77,15 @@ func (p *PostgresCaseResultRepo) AddResult(ctx context.Context, result *models.C
 		Values(result.UserID, result.CaseID, result.DialogID, result.StepsCount, result.TokensUsed, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative).
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("add result: build query: %w", err)
 	}
+
 	_, err = p.db.ExecContext(ctx, query, args...)
-	return err
+	if err != nil {
+		return fmt.Errorf("add result: exec: %w", err)
+	}
+
+	return nil
 }
 
 func (p *PostgresCaseResultRepo) GetResultByDialogID(ctx context.Context, dialogID int64) (*models.CaseResult, error) {
@@ -79,16 +95,21 @@ func (p *PostgresCaseResultRepo) GetResultByDialogID(ctx context.Context, dialog
 		Where(sq.Eq{"dialog_id": dialogID}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get result by dialog id: build query: %w", err)
 	}
+
 	result := &models.CaseResult{}
 	err = p.db.QueryRowContext(ctx, query, args...).Scan(
 		&result.ID, &result.UserID, &result.CaseID, &result.DialogID, &result.StepsCount, &result.TokensUsed,
 		&result.Assertiveness, &result.Empathy, &result.ClarityCommunication, &result.Resistance, &result.Eloquence, &result.Initiative,
 	)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("result dialog_id=%d: %w", dialogID, apperrors.ErrNotFound)
+		}
+		return nil, fmt.Errorf("get result by dialog id: scan: %w", err)
 	}
+
 	return result, nil
 }
 
@@ -98,9 +119,8 @@ func (p *PostgresCaseResultRepo) GetProfileByUserID(ctx context.Context, userID 
 		From("case_profiles").
 		Where(sq.Eq{"user_id": userID}).
 		ToSql()
-
 	if err != nil {
-		return nil, fmt.Errorf("failed to build select query: %w", err)
+		return nil, fmt.Errorf("get profile by user id: build query: %w", err)
 	}
 
 	profile := &models.CaseProfile{}
@@ -109,12 +129,11 @@ func (p *PostgresCaseResultRepo) GetProfileByUserID(ctx context.Context, userID 
 		&profile.Assertiveness, &profile.Empathy, &profile.ClarityCommunication,
 		&profile.Resistance, &profile.Eloquence, &profile.Initiative,
 	)
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan profile: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("profile user_id=%d: %w", userID, apperrors.ErrNotFound)
+		}
+		return nil, fmt.Errorf("get profile by user id: scan: %w", err)
 	}
 
 	return profile, nil
@@ -126,9 +145,8 @@ func (p *PostgresCaseResultRepo) GetProfileByID(ctx context.Context, id int64) (
 		From("case_profiles").
 		Where(sq.Eq{"id": id}).
 		ToSql()
-
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get profile by id: build query: %w", err)
 	}
 
 	profile := &models.CaseProfile{}
@@ -137,12 +155,11 @@ func (p *PostgresCaseResultRepo) GetProfileByID(ctx context.Context, id int64) (
 		&profile.Assertiveness, &profile.Empathy, &profile.ClarityCommunication,
 		&profile.Resistance, &profile.Eloquence, &profile.Initiative,
 	)
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("profile id=%d: %w", id, apperrors.ErrNotFound)
+		}
+		return nil, fmt.Errorf("get profile by id: scan: %w", err)
 	}
 
 	return profile, nil
@@ -157,13 +174,15 @@ func (p *PostgresCaseResultRepo) GetHistoryBy(ctx context.Context, userID int64,
 		OrderBy("actual_date DESC").
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get history: build query: %w", err)
 	}
+
 	rows, err := p.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get history: query: %w", err)
 	}
 	defer rows.Close()
+
 	var result []*models.CaseProfileHistory
 	for rows.Next() {
 		var profile models.CaseProfileHistory
@@ -172,27 +191,40 @@ func (p *PostgresCaseResultRepo) GetHistoryBy(ctx context.Context, userID int64,
 			&profile.Assertiveness, &profile.Empathy, &profile.ClarityCommunication,
 			&profile.Resistance, &profile.Eloquence, &profile.Initiative, &profile.Date,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("get history: scan: %w", err)
 		}
 		result = append(result, &profile)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get history: rows iteration: %w", err)
 	}
+
 	return result, nil
 }
 
 func (p *PostgresCaseResultRepo) DeleteResultByID(ctx context.Context, id int64) error {
 	query, args, err := psql.
-		Delete("case_profile_histories").
+		Delete("case_profile_results").
 		Where(sq.Eq{"id": id}).
 		ToSql()
-
 	if err != nil {
-		return err
+		return fmt.Errorf("delete result: build query: %w", err)
 	}
 
-	_, err = p.db.ExecContext(ctx, query, args...)
-	return err
+	res, err := p.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("delete result: exec: %w", err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("delete result: rows affected: %w", err)
+	}
+
+	if affected == 0 {
+		return fmt.Errorf("result id=%d: %w", id, apperrors.ErrNotFound)
+	}
+
+	return nil
 }

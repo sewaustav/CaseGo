@@ -1,7 +1,12 @@
 package http
 
 import (
+	"errors"
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/sewaustav/CaseGoProfile/apperrors"
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/models"
 )
 
@@ -32,4 +37,19 @@ func (h *HttpHandler) GetUserID(c *gin.Context) (int64, models.UserRole, bool) {
 	}
 
 	return uid, models.UserRole(role), true
+}
+
+func HandleError(c *gin.Context, err error) {
+	if appErr, ok := errors.AsType[*apperrors.AppError](err); ok {
+		if appErr.Code == http.StatusInternalServerError {
+			log.Printf("[ERROR] %s: %v", appErr.Message, appErr.Err)
+			c.AbortWithStatusJSON(appErr.Code, gin.H{"error": "internal server error"})
+			return
+		}
+		c.AbortWithStatusJSON(appErr.Code, gin.H{"error": appErr.Message})
+		return
+	}
+
+	log.Printf("[ERROR] unhandled error: %v", err)
+	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 }

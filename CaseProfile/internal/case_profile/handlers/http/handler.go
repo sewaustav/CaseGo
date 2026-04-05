@@ -23,7 +23,7 @@ func (h HttpHandler) GetProfileHandler(c *gin.Context) {
 
 	userID, role, exists := h.GetUserID(c)
 	if !exists {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
@@ -34,7 +34,7 @@ func (h HttpHandler) GetProfileHandler(c *gin.Context) {
 
 	profile, err := h.service.GetProfileService(ctx, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
@@ -48,15 +48,16 @@ func (h HttpHandler) GetHistoryHandler(c *gin.Context) {
 	if fromDateStr == "" {
 		fromDateStr = "2026-01-01"
 	}
+
 	fromDate, err := time.Parse("2006-01-02", fromDateStr)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid date format, expected YYYY-MM-DD"})
 		return
 	}
 
 	userID, role, exists := h.GetUserID(c)
 	if !exists {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
@@ -67,7 +68,7 @@ func (h HttpHandler) GetHistoryHandler(c *gin.Context) {
 
 	history, err := h.service.GetHistoryService(ctx, user, fromDate)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h HttpHandler) GetUserProfileHandler(c *gin.Context) {
 
 	userID, role, exists := h.GetUserID(c)
 	if !exists {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
@@ -88,11 +89,11 @@ func (h HttpHandler) GetUserProfileHandler(c *gin.Context) {
 		Role:   role,
 	}
 
-	userIdStr := c.Param("user_id")
-	idStr := c.Param("id")
+	userIdStr := c.Query("user_id")
+	idStr := c.Query("id")
 
 	if userIdStr == "" && idStr == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "User ID or case ID must be provided"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user_id or id query parameter must be provided"})
 		return
 	}
 
@@ -100,23 +101,25 @@ func (h HttpHandler) GetUserProfileHandler(c *gin.Context) {
 	if userIdStr != "" {
 		userIDReq, err := strconv.ParseInt(userIdStr, 10, 64)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
 			return
 		}
+
 		userProfile, err = h.service.GetProfileByUserIDService(ctx, userIDReq, user)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleError(c, err)
 			return
 		}
 	} else {
 		idReq, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid case ID"})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 			return
 		}
+
 		userProfile, err = h.service.GetProfileByIDService(ctx, idReq, user)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			HandleError(c, err)
 			return
 		}
 	}
@@ -129,7 +132,7 @@ func (h HttpHandler) GetUserProfileHistoryHandler(c *gin.Context) {
 
 	userID, role, exists := h.GetUserID(c)
 	if !exists {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
@@ -140,19 +143,19 @@ func (h HttpHandler) GetUserProfileHistoryHandler(c *gin.Context) {
 
 	userIdStr := c.Param("user_id")
 	if userIdStr == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "User ID must be provided"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user_id must be provided"})
 		return
 	}
 
 	userIdReq, err := strconv.ParseInt(userIdStr, 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
 		return
 	}
 
 	history, err := h.service.GetUserHistoryService(ctx, userIdReq, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
@@ -164,25 +167,26 @@ func (h HttpHandler) DeleteResultByIDHandler(c *gin.Context) {
 
 	userID, role, exists := h.GetUserID(c)
 	if !exists {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+
 	user := models.UserIdentity{
 		UserID: userID,
 		Role:   role,
 	}
 
-	userIdStr := c.Param("user_id")
-	userIdReq, err := strconv.ParseInt(userIdStr, 10, 64)
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid result id"})
 		return
 	}
 
-	if err := h.service.DeleteResultByIDService(ctx, userIdReq, user); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := h.service.DeleteResultByIDService(ctx, id, user); err != nil {
+		HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Result deleted successfully"})
+	c.Status(http.StatusNoContent)
 }
