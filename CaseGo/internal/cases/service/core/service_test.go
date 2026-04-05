@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"net/http"
 
 	"testing"
 
+	"github.com/sewaustav/CaseGoCore/apperrors"
 	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
 	"github.com/sewaustav/CaseGoCore/mocks"
@@ -194,7 +196,11 @@ func TestHandleInteractionService_ForbiddenUser(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, got)
-	assert.EqualError(t, err, "user not authorized to interact with this dialog")
+
+	var appErr *apperrors.AppError
+	require.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusForbidden, appErr.Code)
+	assert.Contains(t, appErr.Message, "not authorized")
 }
 
 func TestCompleteDialogService(t *testing.T) {

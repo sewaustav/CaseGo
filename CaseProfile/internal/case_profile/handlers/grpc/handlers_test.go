@@ -2,8 +2,9 @@ package grpc
 
 import (
 	"context"
-	"errors"
 	"testing"
+
+	"github.com/sewaustav/CaseGoProfile/apperrors"
 
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/dto"
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/models"
@@ -90,7 +91,7 @@ func TestSendResult_NoUserID(t *testing.T) {
 
 	st, ok := status.FromError(err)
 	assert.True(t, ok)
-	assert.Equal(t, codes.Internal, st.Code())
+	assert.Equal(t, codes.Unauthenticated, st.Code())
 	assert.Contains(t, st.Message(), "user id not found")
 }
 
@@ -108,11 +109,14 @@ func TestSendResult_ServiceError(t *testing.T) {
 	}
 
 	svc.On("HandleResultsService", mock.Anything, mock.AnythingOfType("dto.Result"), mock.AnythingOfType("models.UserIdentity")).
-		Return(errors.New("service error"))
+		Return(apperrors.NewInternal("failed to add case result", nil))
 
 	resp, err := handler.SendResult(ctx, req)
 
 	assert.Nil(t, resp)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "service error")
+
+	st, ok := status.FromError(err)
+	assert.True(t, ok)
+	assert.Equal(t, codes.Internal, st.Code())
 }
