@@ -1,4 +1,3 @@
-// CaseProfile/internal/case_profile/handlers/http/handler_test.go
 package http
 
 import (

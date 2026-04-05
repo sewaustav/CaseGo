@@ -3,9 +3,12 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
+	"github.com/sewaustav/CaseGoProfile/apperrors"
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/dto"
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/models"
 	"github.com/sewaustav/CaseGoProfile/mocks"
@@ -42,6 +45,10 @@ func TestGetProfileService_RepoError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusInternalServerError, appErr.Code)
 }
 
 func TestGetHistoryService_Success(t *testing.T) {
@@ -90,7 +97,10 @@ func TestGetProfileByUserIDService_NonAdmin_Forbidden(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "permission")
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusForbidden, appErr.Code)
 }
 
 func TestGetProfileByIDService_Admin_Success(t *testing.T) {
@@ -120,7 +130,10 @@ func TestGetProfileByIDService_NonAdmin_Forbidden(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "permission")
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusForbidden, appErr.Code)
 }
 
 func TestGetUserHistoryService_Admin_Success(t *testing.T) {
@@ -152,7 +165,10 @@ func TestGetUserHistoryService_NonAdmin_Forbidden(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "permission")
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusForbidden, appErr.Code)
 }
 
 func TestDeleteResultByIDService_Admin_Success(t *testing.T) {
@@ -179,7 +195,10 @@ func TestDeleteResultByIDService_NonAdmin_Forbidden(t *testing.T) {
 	err := svc.DeleteResultByIDService(ctx, 5, user)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "permission")
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusForbidden, appErr.Code)
 }
 
 func TestHandleResultsService_AddResultError(t *testing.T) {
@@ -202,7 +221,10 @@ func TestHandleResultsService_AddResultError(t *testing.T) {
 	err := svc.HandleResultsService(ctx, result, user)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "insert error")
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusInternalServerError, appErr.Code)
 }
 
 func TestHandleResultsService_NewProfile(t *testing.T) {
@@ -225,7 +247,8 @@ func TestHandleResultsService_NewProfile(t *testing.T) {
 	}
 
 	repo.On("AddResult", ctx, mock.AnythingOfType("*models.CaseResult")).Return(nil)
-	repo.On("GetProfileByUserID", ctx, int64(1)).Return(nil, nil)
+	// Репо теперь возвращает ErrNotFound вместо nil, nil
+	repo.On("GetProfileByUserID", ctx, int64(1)).Return(nil, fmt.Errorf("profile user_id=1: %w", apperrors.ErrNotFound))
 	repo.On("UpdateProfile", ctx, mock.MatchedBy(func(p *models.CaseProfile) bool {
 		return p.UserID == 1 && p.TotalCases == 1 && p.Assertiveness == float32(0.8)
 	})).Return(nil)
@@ -249,5 +272,8 @@ func TestHandleResultsService_GetProfileError(t *testing.T) {
 	err := svc.HandleResultsService(ctx, result, user)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "db error")
+
+	var appErr *apperrors.AppError
+	assert.ErrorAs(t, err, &appErr)
+	assert.Equal(t, http.StatusInternalServerError, appErr.Code)
 }
