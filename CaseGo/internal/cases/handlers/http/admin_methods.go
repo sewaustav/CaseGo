@@ -36,10 +36,11 @@ func (h *CaseGoHttpHandler) CreateCaseHandler(c *gin.Context) {
 
 	newCase, err := h.service.CreateCaseService(ctx, req, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, newCase)
+
+	c.JSON(http.StatusCreated, newCase)
 }
 
 func (h *CaseGoHttpHandler) UpdateCaseHandler(c *gin.Context) {
@@ -85,9 +86,10 @@ func (h *CaseGoHttpHandler) UpdateCaseHandler(c *gin.Context) {
 
 	updatedCase, err := h.service.PatchCaseService(ctx, caseID, req, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, updatedCase)
 }
 
@@ -112,10 +114,9 @@ func (h *CaseGoHttpHandler) DeleteCaseHandler(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteCaseService(ctx, caseID, user); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"message": "Case deleted successfully"})
+	c.Status(http.StatusNoContent)
 }
-

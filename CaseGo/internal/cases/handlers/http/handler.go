@@ -32,12 +32,11 @@ func (h *CaseGoHttpHandler) GetCasesHandler(c *gin.Context) {
 		Category: req.Category,
 	})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, cases)
-
 }
 
 func (h *CaseGoHttpHandler) StartCaseHandler(c *gin.Context) {
@@ -55,15 +54,18 @@ func (h *CaseGoHttpHandler) StartCaseHandler(c *gin.Context) {
 	}
 
 	caseID, err := strconv.ParseInt(c.Param("caseID"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid case ID"})
+		return
+	}
 
 	dialog, err := h.service.StartDialogService(ctx, caseID, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, dialog)
-
 }
 
 func (h *CaseGoHttpHandler) DialogHandler(c *gin.Context) {
@@ -80,19 +82,19 @@ func (h *CaseGoHttpHandler) DialogHandler(c *gin.Context) {
 		Role:   role,
 	}
 
-	var req *dto.InteractionDto
-	if err := c.ShouldBindBodyWithJSON(req); err != nil {
+	var req dto.InteractionDto
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	question, err := h.service.HandleInteractionService(ctx, req, user)
+	question, err := h.service.HandleInteractionService(ctx, &req, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, question)
-
 }
 
 func (h *CaseGoHttpHandler) CompleteDialogHandler(c *gin.Context) {
@@ -117,7 +119,8 @@ func (h *CaseGoHttpHandler) CompleteDialogHandler(c *gin.Context) {
 
 	result, err := h.service.CompleteDialogService(ctx, dialogID, user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, result)
@@ -134,7 +137,7 @@ func (h *CaseGoHttpHandler) GetCaseByIDHandler(c *gin.Context) {
 
 	caseModel, err := h.service.GetCaseByIDService(ctx, caseID)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
 
@@ -149,16 +152,19 @@ func (h *CaseGoHttpHandler) GetUsersDialogsHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+
 	userID, err := strconv.ParseInt(c.Query("userID"), 10, 64)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
+
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid limit"})
 		return
 	}
+
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid page"})
@@ -172,16 +178,23 @@ func (h *CaseGoHttpHandler) GetUsersDialogsHandler(c *gin.Context) {
 
 	conv, err := h.service.GetUsersDialogsService(ctx, user, userID, limit, page)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		HandleError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, conv)
 }
 
 func (h *CaseGoHttpHandler) GetDialogByIDHandler(c *gin.Context) {
 	ctx := c.Request.Context()
+
 	dialogID, err := strconv.ParseInt(c.Param("dialogID"), 10, 64)
 	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid dialog ID"})
+		return
+	}
+
+	if dialogID <= 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid dialog ID"})
 		return
 	}
@@ -197,15 +210,11 @@ func (h *CaseGoHttpHandler) GetDialogByIDHandler(c *gin.Context) {
 		Role:   role,
 	}
 
-	if dialogID <= 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid dialog ID"})
+	dialog, err := h.service.GetUserDialogByIDService(ctx, user, dialogID)
+	if err != nil {
+		HandleError(c, err)
 		return
 	}
 
-	dialog, err := h.service.GetUserDialogByIDService(ctx, user, dialogID)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 	c.JSON(http.StatusOK, dialog)
 }
