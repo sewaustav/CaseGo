@@ -18,7 +18,7 @@ func NewHttpHandler(service service.Service) *HttpHandler {
 	return &HttpHandler{service: service}
 }
 
-func (h *HttpHandler) GetProfileHandler(c *gin.Context) {
+func (h HttpHandler) GetProfileHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userID, role, exists := h.GetUserID(c)
@@ -41,7 +41,7 @@ func (h *HttpHandler) GetProfileHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, profile)
 }
 
-func (h *HttpHandler) GetHistoryHandler(c *gin.Context) {
+func (h HttpHandler) GetHistoryHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	fromDateStr := c.Query("from")
@@ -124,7 +124,7 @@ func (h HttpHandler) GetUserProfileHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, userProfile)
 }
 
-func (h *HttpHandler) GetUserProfileHistoryHandler(c *gin.Context) {
+func (h HttpHandler) GetUserProfileHistoryHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userID, role, exists := h.GetUserID(c)
@@ -159,7 +159,7 @@ func (h *HttpHandler) GetUserProfileHistoryHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, history)
 }
 
-func (h *HttpHandler) DeleteResultByIDHandler(c *gin.Context) {
+func (h HttpHandler) DeleteResultByIDHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userID, role, exists := h.GetUserID(c)
