@@ -1,0 +1,43 @@
+CREATE TABLE IF NOT EXISTS case_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE,
+    total_cases BIGINT DEFAULT 0,
+    assertiveness DOUBLE PRECISION DEFAULT 0,
+    empathy DOUBLE PRECISION DEFAULT 0,
+    clarity_communication DOUBLE PRECISION DEFAULT 0,
+    resistance DOUBLE PRECISION DEFAULT 0,
+    eloquence DOUBLE PRECISION DEFAULT 0,
+    initiative DOUBLE PRECISION DEFAULT 0,
+    changed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+
+);
+
+CREATE TABLE IF NOT EXISTS case_profile_histories (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    assertiveness DOUBLE PRECISION DEFAULT 0,
+    empathy DOUBLE PRECISION DEFAULT 0,
+    clarity_communication DOUBLE PRECISION DEFAULT 0,
+    resistance DOUBLE PRECISION DEFAULT 0,
+    eloquence DOUBLE PRECISION DEFAULT 0,
+    initiative DOUBLE PRECISION DEFAULT 0,
+    actual_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS case_profile_results (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    case_id BIGINT NOT NULL,
+    dialog_id BIGINT NOT NULL,
+    steps_count INT DEFAULT 0,
+    tokens_used INT DEFAULT 0,
+    assertiveness DOUBLE PRECISION DEFAULT 0,
+    empathy DOUBLE PRECISION DEFAULT 0,
+    clarity_communication DOUBLE PRECISION DEFAULT 0,
+    resistance DOUBLE PRECISION DEFAULT 0,
+    eloquence DOUBLE PRECISION DEFAULT 0,
+    initiative DOUBLE PRECISION DEFAULT 0,
+    case_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_case_profile_histories_user_id ON case_profile_histories(user_id);
