@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -64,6 +65,7 @@ func TestGetProfileHandler_Unauthorized(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
+// FIX: errors.New() — не *AppError, HandleError вернёт 500, а не 400
 func TestGetProfileHandler_ServiceError(t *testing.T) {
 	svc := mocks.NewService(t)
 	handler := NewHttpHandler(svc)
@@ -78,7 +80,7 @@ func TestGetProfileHandler_ServiceError(t *testing.T) {
 
 	handler.GetProfileHandler(c)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 // ======================== GetHistoryHandler ========================
@@ -153,6 +155,7 @@ func TestGetHistoryHandler_Unauthorized(t *testing.T) {
 
 // ======================== GetUserProfileHandler ========================
 
+// FIX: handler использует c.Query(), а не c.Params — передаём через URL query string
 func TestGetUserProfileHandler_ByUserID_Success(t *testing.T) {
 	svc := mocks.NewService(t)
 	handler := NewHttpHandler(svc)
@@ -164,8 +167,7 @@ func TestGetUserProfileHandler_ByUserID_Success(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodGet, "/admin/profile", nil)
-	c.Params = gin.Params{{Key: "user_id", Value: "42"}}
+	c.Request = httptest.NewRequest(http.MethodGet, "/admin/profile?user_id=42", nil)
 	setUserContext(c, 99, int(models.Admin))
 
 	handler.GetUserProfileHandler(c)
@@ -173,6 +175,7 @@ func TestGetUserProfileHandler_ByUserID_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+// FIX: handler использует c.Query("id"), передаём через URL query string
 func TestGetUserProfileHandler_ByID_Success(t *testing.T) {
 	svc := mocks.NewService(t)
 	handler := NewHttpHandler(svc)
@@ -184,8 +187,7 @@ func TestGetUserProfileHandler_ByID_Success(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodGet, "/admin/profile", nil)
-	c.Params = gin.Params{{Key: "id", Value: "10"}}
+	c.Request = httptest.NewRequest(http.MethodGet, "/admin/profile?id=10", nil)
 	setUserContext(c, 99, int(models.Admin))
 
 	handler.GetUserProfileHandler(c)
@@ -213,8 +215,7 @@ func TestGetUserProfileHandler_InvalidUserID(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodGet, "/admin/profile", nil)
-	c.Params = gin.Params{{Key: "user_id", Value: "abc"}}
+	c.Request = httptest.NewRequest(http.MethodGet, "/admin/profile?user_id=abc", nil)
 	setUserContext(c, 99, int(models.Admin))
 
 	handler.GetUserProfileHandler(c)
@@ -307,18 +308,32 @@ func TestDeleteResultByIDHandler_Success(t *testing.T) {
 	svc := mocks.NewService(t)
 	handler := NewHttpHandler(svc)
 
-	svc.On("DeleteResultByIDService", mock.Anything, int64(5), models.UserIdentity{UserID: 99, Role: models.Admin}).
-		Return(nil)
+	testID := int64(5)
+	testUID := int64(99)
+	testRole := models.Admin
+
+	svc.On("DeleteResultByIDService",
+		mock.Anything,
+		testID,
+		models.UserIdentity{UserID: testUID, Role: testRole},
+	).Return(nil).Once()
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+
+	c.Params = gin.Params{{Key: "id", Value: "5"}}
 	c.Request = httptest.NewRequest(http.MethodDelete, "/admin/result/5", nil)
-	c.Params = gin.Params{{Key: "user_id", Value: "5"}}
-	setUserContext(c, 99, int(models.Admin))
+
+	setUserContext(c, testUID, int(testRole))
+
+	c.Request = httptest.NewRequest(http.MethodDelete, "/admin/result/5", nil)
+	fmt.Println("Params:", c.Params)
+	fmt.Println("Param id:", c.Param("id"))
 
 	handler.DeleteResultByIDHandler(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
+	svc.AssertExpectations(t)
 }
 
 func TestDeleteResultByIDHandler_InvalidID(t *testing.T) {
@@ -328,7 +343,7 @@ func TestDeleteResultByIDHandler_InvalidID(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodDelete, "/admin/result/abc", nil)
-	c.Params = gin.Params{{Key: "user_id", Value: "abc"}}
+	c.Params = gin.Params{{Key: "id", Value: "abc"}}
 	setUserContext(c, 99, int(models.Admin))
 
 	handler.DeleteResultByIDHandler(c)
@@ -359,10 +374,10 @@ func TestDeleteResultByIDHandler_ServiceError(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodDelete, "/admin/result/5", nil)
-	c.Params = gin.Params{{Key: "user_id", Value: "5"}}
+	c.Params = gin.Params{{Key: "id", Value: "5"}}
 	setUserContext(c, 99, int(models.Admin))
 
 	handler.DeleteResultByIDHandler(c)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
