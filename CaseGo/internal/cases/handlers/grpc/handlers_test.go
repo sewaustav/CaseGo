@@ -16,6 +16,12 @@ type fakeCasesClient struct {
 	lastReq *pb.CaseResult
 }
 
+type mockToken struct{}
+
+func (m *mockToken) GenerateToken(userID int64, role models.UserRole) (string, error) {
+	return "test-token", nil
+}
+
 func (f *fakeCasesClient) SendResult(ctx context.Context, req *pb.CaseResult, opts ...grpc.CallOption) (*pb.Response, error) {
 	f.lastReq = req
 	return &pb.Response{}, nil
@@ -23,7 +29,8 @@ func (f *fakeCasesClient) SendResult(ctx context.Context, req *pb.CaseResult, op
 
 func TestSendResults(t *testing.T) {
 	client := &fakeCasesClient{}
-	h := &CaseGoGRPC{client: client}
+	tokenMock := &mockToken{}
+	h := &CaseGoGRPC{client: client, token: tokenMock}
 
 	now := time.Now().UTC().Truncate(time.Second)
 	err := h.SendResults(context.Background(), models.Result{

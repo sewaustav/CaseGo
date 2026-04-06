@@ -24,10 +24,10 @@ func NewToken(privateKey *rsa.PrivateKey) *Token {
 
 func (t *Token) GenerateToken(userID int64, role models.UserRole) (string, error) {
 	claims := jwt.MapClaims{
-		"iss":  "cases",                       // Издатель
-		"aud":  "profile",                     // Аудитория
-		"sub":  strconv.FormatInt(userID, 10), // ID пользователя как string
-		"role": string(role),                  // Роль как string
+		"iss":  "cases",
+		"aud":  "profile",
+		"sub":  strconv.FormatInt(userID, 10),
+		"role": string(rune(role)),
 		"exp":  time.Now().Add(time.Hour * 1).Unix(),
 		"iat":  time.Now().Unix(),
 	}
