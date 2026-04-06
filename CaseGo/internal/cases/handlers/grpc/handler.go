@@ -39,7 +39,7 @@ func (c *CaseGoGRPC) SendResults(ctx context.Context, msg models.Result) error {
 		return err
 	}
 
-	md := metadata.Pairs("authorization", "Bearer"+jwtToken)
+	md := metadata.Pairs("authorization", "Bearer "+jwtToken)
 	authCtx := metadata.NewOutgoingContext(ctx, md)
 
 	req := &pb.CaseResult{
