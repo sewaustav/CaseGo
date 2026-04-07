@@ -64,7 +64,12 @@ func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, intera
 
 	history = append(history, *interactionModel)
 
-	llmResponse, err := s.llmService.GenerateResponse(ctx, history)
+	activeCase, err := s.caseGoRepo.GetCaseByID(ctx, dialog.CaseID)
+	if err != nil {
+		return nil, apperrors.NewInternal("failed to get case", err)
+	}
+
+	llmResponse, err := s.llmService.GenerateResponse(ctx, activeCase, dialog, history)
 	if err != nil {
 		return nil, apperrors.NewInternal("failed to generate LLM response", err)
 	}
