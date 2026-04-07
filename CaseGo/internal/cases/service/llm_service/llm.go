@@ -10,7 +10,7 @@ import (
 
 type LLM interface {
 	GenerateCase(ctx context.Context, description string) (*models.Case, error)
-	GenerateResponse(ctx context.Context, history []models.Interaction) (*dto.CaseDto, error)
+	GenerateResponse(ctx context.Context, caseModel *models.Case, activeCase *models.Dialog, history []models.Interaction) (*dto.CaseDto, error)
 	AnalyzeCase(ctx context.Context, conv []models.Interaction) (*dto.Result, error)
 }
 
