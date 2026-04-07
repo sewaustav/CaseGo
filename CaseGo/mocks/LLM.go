@@ -77,9 +77,9 @@ func (_m *LLM) GenerateCase(ctx context.Context, description string) (*models.Ca
 	return r0, r1
 }
 
-// GenerateResponse provides a mock function with given fields: ctx, history
-func (_m *LLM) GenerateResponse(ctx context.Context, history []models.Interaction) (*dto.CaseDto, error) {
-	ret := _m.Called(ctx, history)
+// GenerateResponse provides a mock function with given fields: ctx, caseModel, activeCase, history
+func (_m *LLM) GenerateResponse(ctx context.Context, caseModel *models.Case, activeCase *models.Dialog, history []models.Interaction) (*dto.CaseDto, error) {
+	ret := _m.Called(ctx, caseModel, activeCase, history)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateResponse")
@@ -87,19 +87,19 @@ func (_m *LLM) GenerateResponse(ctx context.Context, history []models.Interactio
 
 	var r0 *dto.CaseDto
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []models.Interaction) (*dto.CaseDto, error)); ok {
-		return rf(ctx, history)
+	if rf, ok := ret.Get(0).(func(context.Context, *models.Case, *models.Dialog, []models.Interaction) (*dto.CaseDto, error)); ok {
+		return rf(ctx, caseModel, activeCase, history)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, []models.Interaction) *dto.CaseDto); ok {
-		r0 = rf(ctx, history)
+	if rf, ok := ret.Get(0).(func(context.Context, *models.Case, *models.Dialog, []models.Interaction) *dto.CaseDto); ok {
+		r0 = rf(ctx, caseModel, activeCase, history)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*dto.CaseDto)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, []models.Interaction) error); ok {
-		r1 = rf(ctx, history)
+	if rf, ok := ret.Get(1).(func(context.Context, *models.Case, *models.Dialog, []models.Interaction) error); ok {
+		r1 = rf(ctx, caseModel, activeCase, history)
 	} else {
 		r1 = ret.Error(1)
 	}
