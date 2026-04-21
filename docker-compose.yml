@@ -112,9 +112,146 @@ services:
     networks:
       - app-network
 
+  casego-postgres:
+    image: postgres:15-alpine
+    container_name: casego_postgres
+    restart: unless-stopped
+    env_file:
+      - CaseGo/.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - casego_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-network
+
+  casego-migrate:
+    image: migrate/migrate
+    container_name: casego_migrate
+    volumes:
+      - ./CaseGo/migrations:/migrations
+    command: -path=/migrations/ -database "postgres://casego_user:casego_password@casego-postgres:5432/casego_db?sslmode=disable" up
+    env_file:
+      - CaseGo/.env
+    depends_on:
+      casego-postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  casego-redis:
+    image: redis:8-alpine
+    container_name: casego_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    env_file:
+      - CaseGo/.env
+    volumes:
+      - casego_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-network
+
+  case-go:
+    build:
+      context: ./CaseGo
+      secrets:
+        - github_token
+    container_name: case_go
+    env_file:
+      - CaseGo/.env
+    environment:
+      POSTGRES_HOST: casego-postgres
+      POSTGRES_PORT: 5432
+      REDIS_HOST: casego-redis
+      REDIS_PORT: 6379
+    ports:
+      - "8081:8080"
+    depends_on:
+      casego-postgres:
+        condition: service_healthy
+      casego-migrate:
+        condition: service_completed_successfully
+      casego-redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
 volumes:
   auth_postgres_data:
   auth_redis_data:
+  casego_postgres_data:
+  casego_redis_data:
+  caseprofile_postgres_data:
+
+  caseprofile-postgres:
+    image: postgres:15-alpine
+    container_name: caseprofile_postgres
+    restart: unless-stopped
+    env_file:
+      - CaseProfile/.env
+    ports:
+      - "5434:5432"
+    volumes:
+      - caseprofile_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-network
+
+  caseprofile-migrate:
+    image: migrate/migrate
+    container_name: caseprofile_migrate
+    volumes:
+      - ./CaseProfile/migrations:/migrations
+    command: -path=/migrations/ -database "postgres://caseprofile_user:caseprofile_password@caseprofile-postgres:5432/caseprofile_db?sslmode=disable" up
+    depends_on:
+      caseprofile-postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  case-profile:
+    build:
+      context: ./CaseProfile
+      secrets:
+        - github_token
+    container_name: case_profile
+    env_file:
+      - CaseProfile/.env
+    environment:
+      POSTGRES_HOST: caseprofile-postgres
+      POSTGRES_PORT: 5432
+    ports:
+      - "8082:8080"
+    depends_on:
+      caseprofile-postgres:
+        condition: service_healthy
+      caseprofile-migrate:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+
+secrets:
+  github_token:
+    environment: GITHUB_TOKEN
 
 networks:
   app-network:
