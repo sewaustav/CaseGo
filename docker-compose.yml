@@ -190,13 +190,6 @@ services:
     networks:
       - app-network
 
-volumes:
-  auth_postgres_data:
-  auth_redis_data:
-  casego_postgres_data:
-  casego_redis_data:
-  caseprofile_postgres_data:
-
   caseprofile-postgres:
     image: postgres:15-alpine
     container_name: caseprofile_postgres
@@ -241,6 +234,7 @@ volumes:
       POSTGRES_PORT: 5432
     ports:
       - "8082:8080"
+      - "50051:50051"
     depends_on:
       caseprofile-postgres:
         condition: service_healthy
@@ -248,6 +242,13 @@ volumes:
         condition: service_completed_successfully
     networks:
       - app-network
+
+volumes:
+  auth_postgres_data:
+  auth_redis_data:
+  casego_postgres_data:
+  casego_redis_data:
+  caseprofile_postgres_data:
 
 secrets:
   github_token:
