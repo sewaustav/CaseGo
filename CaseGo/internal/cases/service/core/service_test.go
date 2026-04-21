@@ -148,14 +148,20 @@ func TestHandleInteractionService(t *testing.T) {
 	}
 
 	dialogRepo.On("GetDialogByID", ctx, int64(1)).Return(&models.Dialog{ID: 1, UserID: 7}, nil)
+	caseRepo.On("GetCaseByID", ctx, mock.Anything).Return(&models.Case{ID: 0}, nil)
 	redisClient.On("GetFullHistory", ctx, int64(1)).Return([]models.Interaction{}, nil)
-	llm.On("GenerateResponse", ctx, mock.MatchedBy(func(history []models.Interaction) bool {
-		return len(history) == 1 &&
-			history[0].DialogID == 1 &&
-			history[0].Step == 3 &&
-			history[0].Question == "q" &&
-			history[0].Answer == "a"
-	})).Return(&dto.CaseDto{Model: "gpt"}, nil)
+	llm.On("GenerateResponse", 
+    ctx, 
+    mock.Anything, // для *models.Case
+    mock.Anything, // для *models.Dialog
+    mock.MatchedBy(func(history []models.Interaction) bool {
+        return len(history) == 1 &&
+            history[0].DialogID == 1 &&
+            history[0].Step == 3 &&
+            history[0].Question == "q" &&
+            history[0].Answer == "a"
+    }),
+).Return(&dto.CaseDto{Model: "gpt"}, nil)
 	redisClient.On("Push", ctx, mock.MatchedBy(func(inter *models.Interaction) bool {
 		return inter.DialogID == 1 &&
 			inter.Step == 3 &&
