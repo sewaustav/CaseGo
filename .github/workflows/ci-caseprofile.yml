@@ -61,5 +61,5 @@ jobs:
           context: ./CaseProfile
           push: false
           secrets: |
-            github_token=${{ secrets.GITHUB_TOKEN }}
+            github_token=${{ secrets.GH_PAT }}
           tags: case-profile:${{ github.sha }}
