@@ -95,10 +95,10 @@ services:
   auth-redis:
     image: redis:8.2.1-alpine
     container_name: auth_redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${AUTH_REDIS_PASSWORD}
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT_FORWARD}:6379"
+      - "${AUTH_REDIS_PORT_FORWARD}:6379"
     env_file:
       - Auth/.env
     volumes:
@@ -148,7 +148,7 @@ services:
   casego-redis:
     image: redis:8-alpine
     container_name: casego_redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${CASEGO_REDIS_PASSWORD}
     restart: unless-stopped
     ports:
       - "6380:6379"
