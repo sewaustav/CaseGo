@@ -9,10 +9,11 @@ func (h *CaseGoHttpHandler) RegisterRoutes(rg *gin.RouterGroup, middleware *rs25
 	routes := rg.Group("/case_go")
 	routes.Use(middleware.Handler())
 	{
-		routes.POST("/cases", h.StartCaseHandler)
+		routes.POST("/cases/:caseID", h.StartCaseHandler)
 		routes.GET("/cases", h.GetCasesHandler)
 		routes.GET("/cases/:caseID", h.GetCaseByIDHandler)
 		routes.GET("/users/:userID/dialogs", h.GetUsersDialogsHandler)
+		routes.POST("/dialog", h.DialogHandler)
 		routes.GET("/dialogs/:dialogID", h.GetDialogByIDHandler)
 		routes.POST("/dialogs/:dialogID/complete", h.CompleteDialogHandler)
 
