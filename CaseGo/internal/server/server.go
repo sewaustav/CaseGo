@@ -46,7 +46,12 @@ func New() (*Server, error) {
 		return nil, err
 	}
 
-	llmService := llm_service.NewLLMService(conf.LLMURL)
+	var llmService llm_service.LLM
+	if conf.LLMProvider == "gigachat" {
+		llmService = llm_service.NewGigaChatService(conf.GigaChatAuthKey)
+	} else {
+		llmService = llm_service.NewLLMService(conf.LLMURL)
+	}
 
 	tokenService := tk.NewToken(conf.PrivateKey)
 
