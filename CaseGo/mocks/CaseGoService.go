@@ -275,23 +275,23 @@ func (_m *CaseGoService) PatchCaseService(ctx context.Context, caseID int64, cas
 }
 
 // StartDialogService provides a mock function with given fields: ctx, caseID, user
-func (_m *CaseGoService) StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*models.Case, error) {
+func (_m *CaseGoService) StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*dto.StartDialogResponse, error) {
 	ret := _m.Called(ctx, caseID, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StartDialogService")
 	}
 
-	var r0 *models.Case
+	var r0 *dto.StartDialogResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) (*models.Case, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) (*dto.StartDialogResponse, error)); ok {
 		return rf(ctx, caseID, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) *models.Case); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) *dto.StartDialogResponse); ok {
 		r0 = rf(ctx, caseID, user)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.Case)
+			r0 = ret.Get(0).(*dto.StartDialogResponse)
 		}
 	}
 

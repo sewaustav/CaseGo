@@ -12,7 +12,7 @@ import (
 )
 
 type CaseGoService interface {
-	StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*models.Case, error)
+	StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*dto.StartDialogResponse, error)
 	HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto, user models.UserIdentity) (*dto.CaseDto, error)
 	CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.Result, error)
 
