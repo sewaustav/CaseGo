@@ -27,7 +27,7 @@ func (t *Token) GenerateToken(userID int64, role models.UserRole) (string, error
 		"iss":  "cases",
 		"aud":  "profile",
 		"sub":  strconv.FormatInt(userID, 10),
-		"role": string(rune(role)),
+		"role": strconv.Itoa(int(role)),
 		"exp":  time.Now().Add(time.Hour * 1).Unix(),
 		"iat":  time.Now().Unix(),
 	}
