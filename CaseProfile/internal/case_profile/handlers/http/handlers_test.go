@@ -90,8 +90,8 @@ func TestGetHistoryHandler_Success(t *testing.T) {
 	handler := NewHttpHandler(svc)
 
 	from := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
-	expected := []*models.CaseProfileHistory{
-		{ID: 1, UserID: 10, Assertiveness: 0.5, Date: from},
+	expected := []*models.CaseResult{
+		{ID: 1, UserID: 10, Assertiveness: 0.5},
 	}
 
 	svc.On("GetHistoryService", mock.Anything, models.UserIdentity{UserID: 10, Role: models.User}, from).
@@ -114,7 +114,7 @@ func TestGetHistoryHandler_DefaultFromDate(t *testing.T) {
 	defaultFrom := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	svc.On("GetHistoryService", mock.Anything, models.UserIdentity{UserID: 10, Role: models.User}, defaultFrom).
-		Return([]*models.CaseProfileHistory{}, nil)
+		Return([]*models.CaseResult{}, nil)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
