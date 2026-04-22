@@ -1,14 +1,11 @@
 package http_handlers
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
 	"github.com/sewaustav/CaseGoCore/mocks"
 	"github.com/stretchr/testify/assert"
@@ -26,20 +23,12 @@ func TestGetCasesHandler_OK(t *testing.T) {
 	h := NewCaseGoHttpHandler(svc)
 
 	router := setupRouter()
-	router.POST("/cases", h.GetCasesHandler)
+	router.GET("/cases", h.GetCasesHandler)
 
-	reqBody := dto.GetCasesDto{
-		Limit:    10,
-		Page:     1,
-		Topic:    nil,
-		Category: nil,
-	}
-	raw, _ := json.Marshal(reqBody)
-
-	svc.On("GetCasesService", mock.Anything, 10, 1, mock.AnythingOfType("*dto.UserSettingsDto")).
+	svc.On("GetCasesService", mock.Anything, 20, 1, mock.AnythingOfType("*dto.UserSettingsDto")).
 		Return([]models.Case{{ID: 1}}, nil)
 
-	req := httptest.NewRequest(http.MethodPost, "/cases", bytes.NewReader(raw))
+	req := httptest.NewRequest(http.MethodGet, "/cases?limit=20&page=1", nil)
 	w := httptest.NewRecorder()
 
 	router.ServeHTTP(w, req)
