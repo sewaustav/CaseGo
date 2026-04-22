@@ -1,4 +1,5 @@
 services:
+  # ── Profile ──────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
     container_name: postgres-db
@@ -30,6 +31,7 @@ services:
       - app-network
 
   app:
+    image: ghcr.io/sewaustav/casego-profile:latest
     build:
       context: ./Profile
       args:
@@ -49,8 +51,10 @@ services:
     networks:
       - app-network
 
+  # ── Auth ─────────────────────────────────────────────────
   auth-fastapi:
-    build: 
+    image: ghcr.io/sewaustav/casego-auth:latest
+    build:
       context: ./Auth
     container_name: auth_fastapi
     ports:
@@ -58,15 +62,14 @@ services:
     env_file:
       - Auth/.env
     volumes:
-      - ./Auth/src:/app/src
       - ./Auth/keys:/app/keys:ro
     depends_on:
       auth-postgres:
         condition: service_healthy
-      auth-redis:
-        condition: service_healthy
+      auth-migrate:
+        condition: service_completed_successfully
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=2)" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=2)"]
       interval: 10s
       timeout: 5s
       start_period: 15s
@@ -79,7 +82,7 @@ services:
     container_name: auth_postgres
     restart: unless-stopped
     env_file:
-        - Auth/.env
+      - Auth/.env
     ports:
       - "5444:5432"
     volumes:
@@ -92,26 +95,21 @@ services:
     networks:
       - app-network
 
-  auth-redis:
-    image: redis:8.2.1-alpine
-    container_name: auth_redis
-    command: redis-server --requirepass ${AUTH_REDIS_PASSWORD}
-    restart: unless-stopped
-    ports:
-      - "${AUTH_REDIS_PORT_FORWARD}:6379"
+  auth-migrate:
+    image: ghcr.io/sewaustav/casego-auth:latest
+    build:
+      context: ./Auth
+    container_name: auth_migrate
+    command: alembic upgrade head
     env_file:
       - Auth/.env
-    volumes:
-      - auth_redis_data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping" ]
-      interval: 10s
-      timeout: 15s
-      retries: 5
-      start_period: 5s
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
     networks:
       - app-network
 
+  # ── CaseGo ───────────────────────────────────────────────
   casego-postgres:
     image: postgres:15-alpine
     container_name: casego_postgres
@@ -137,8 +135,6 @@ services:
     volumes:
       - ./CaseGo/migrations:/migrations
     command: -path=/migrations/ -database "postgres://casego_user:casego_password@casego-postgres:5432/casego_db?sslmode=disable" up
-    env_file:
-      - CaseGo/.env
     depends_on:
       casego-postgres:
         condition: service_healthy
@@ -166,10 +162,11 @@ services:
       - app-network
 
   case-go:
+    image: ghcr.io/sewaustav/casego-casego:latest
     build:
       context: ./CaseGo
-      secrets:
-        - github_token
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: case_go
     env_file:
       - CaseGo/.env
@@ -190,6 +187,7 @@ services:
     networks:
       - app-network
 
+  # ── CaseProfile ──────────────────────────────────────────
   caseprofile-postgres:
     image: postgres:15-alpine
     container_name: caseprofile_postgres
@@ -222,10 +220,11 @@ services:
       - app-network
 
   case-profile:
+    image: ghcr.io/sewaustav/casego-caseprofile:latest
     build:
       context: ./CaseProfile
-      secrets:
-        - github_token
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: case_profile
     env_file:
       - CaseProfile/.env
@@ -245,14 +244,9 @@ services:
 
 volumes:
   auth_postgres_data:
-  auth_redis_data:
   casego_postgres_data:
   casego_redis_data:
   caseprofile_postgres_data:
-
-secrets:
-  github_token:
-    environment: GITHUB_TOKEN
 
 networks:
   app-network:

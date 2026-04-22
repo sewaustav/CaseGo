@@ -4,9 +4,9 @@ WORKDIR /build
 
 RUN apk add --no-cache git
 
+ARG GITHUB_TOKEN
 COPY go.mod go.sum ./
-RUN --mount=type=secret,id=github_token \
-    git config --global url."https://$(cat /run/secrets/github_token)@github.com/".insteadOf "https://github.com/" && \
+RUN git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/" && \
     go mod download
 
 COPY . .
