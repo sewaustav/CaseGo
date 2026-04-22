@@ -151,6 +151,7 @@ func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID 
 				CaseID:               dialog.CaseID,
 				DialogID:             dialogID,
 				StepsCount:           r.StepsCount,
+				TokensUsed:           r.TokensUsed,
 				FinishedAt:           time.Now(),
 				Assertiveness:        r.SkillsRating.Assertiveness,
 				Empathy:              r.SkillsRating.Empathy,
