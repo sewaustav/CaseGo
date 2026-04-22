@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Database
     POSTGRES_HOST: str = Field(...)
     POSTGRES_PORT: int = Field(
-        validation_alias=AliasChoices("POSTGRES_PORT_FORWARD", "POSTGRES_PORT")
+        validation_alias=AliasChoices("POSTGRES_PORT", "POSTGRES_PORT_FORWARD")
     )
     POSTGRES_USER: str = Field(...)
     POSTGRES_PASSWORD: SecretStr = Field(...)
