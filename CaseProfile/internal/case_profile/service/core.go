@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/sewaustav/CaseGoProfile/internal/case_profile/models"
 )
 
@@ -14,6 +16,7 @@ func (s CaseResultService) updateProfile(actualResults *models.CaseProfile, newR
 		Resistance:           s.calcNewRating(actualResults.Resistance, newResults.Resistance),
 		Eloquence:            s.calcNewRating(actualResults.Eloquence, newResults.Eloquence),
 		Initiative:           s.calcNewRating(actualResults.Initiative, newResults.Initiative),
+		ChangedAt:            time.Now(),
 	}, nil
 }
 
