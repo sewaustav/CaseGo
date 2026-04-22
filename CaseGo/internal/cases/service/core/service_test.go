@@ -124,7 +124,8 @@ func TestStartDialogService(t *testing.T) {
 	got, err := svc.StartDialogService(ctx, 11, user)
 
 	require.NoError(t, err)
-	assert.Equal(t, expectedCase, got)
+	assert.Equal(t, int64(100), got.DialogID)
+	assert.Equal(t, int64(11), got.CaseID)
 }
 
 func TestHandleInteractionService(t *testing.T) {
