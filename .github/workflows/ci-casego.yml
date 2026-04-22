@@ -93,4 +93,5 @@ jobs:
             git pull
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull case-go
+            docker compose rm -sf case-go
             docker compose up -d --no-deps case-go
