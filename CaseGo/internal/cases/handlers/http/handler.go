@@ -21,10 +21,16 @@ func NewCaseGoHttpHandler(service service.CaseGoService) *CaseGoHttpHandler {
 func (h *CaseGoHttpHandler) GetCasesHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	var req *dto.GetCasesDto
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var req dto.GetCasesDto
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	if req.Limit == 0 {
+		req.Limit = 20
+	}
+	if req.Page == 0 {
+		req.Page = 1
 	}
 
 	cases, err := h.service.GetCasesService(ctx, req.Limit, req.Page, &dto.UserSettingsDto{
