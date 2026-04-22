@@ -55,8 +55,8 @@ func (p *PostgresCaseResultRepo) UpdateProfile(ctx context.Context, result *mode
 func (p *PostgresCaseResultRepo) StoreProfile(ctx context.Context, result *models.CaseProfile) error {
 	query, args, err := psql.
 		Insert("case_profile_histories").
-		Columns("user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
-		Values(result.UserID, result.TotalCases, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
+		Columns("user_id", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
+		Values(result.UserID, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("store profile history: build query: %w", err)
