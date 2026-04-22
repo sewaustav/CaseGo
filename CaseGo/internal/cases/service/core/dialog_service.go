@@ -12,7 +12,7 @@ import (
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
 )
 
-func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*models.Case, error) {
+func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*dto.StartDialogResponse, error) {
 	caseModel, err := s.caseGoRepo.GetCaseByID(ctx, caseID)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {
@@ -21,7 +21,7 @@ func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64
 		return nil, apperrors.NewInternal("failed to get case", err)
 	}
 
-	_, err = s.dialogRepo.StartDialog(ctx, &models.Dialog{
+	dialog, err := s.dialogRepo.StartDialog(ctx, &models.Dialog{
 		UserID: user.UserID,
 		CaseID: caseID,
 	})
@@ -29,7 +29,12 @@ func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64
 		return nil, apperrors.NewInternal("failed to start dialog", err)
 	}
 
-	return caseModel, nil
+	return &dto.StartDialogResponse{
+		DialogID:      dialog.ID,
+		CaseID:        caseModel.ID,
+		FirstQuestion: caseModel.FirstQuestion,
+		Step:          0,
+	}, nil
 }
 
 func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto, user models.UserIdentity) (*dto.CaseDto, error) {

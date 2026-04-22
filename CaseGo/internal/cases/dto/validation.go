@@ -35,6 +35,13 @@ type UserSettingsDto struct {
 	Model    *string `json:"model"`
 }
 
+type StartDialogResponse struct {
+	DialogID      int64  `json:"dialog_id"`
+	CaseID        int64  `json:"case_id"`
+	FirstQuestion string `json:"first_question"`
+	Step          int    `json:"step"`
+}
+
 type GetCasesDto struct {
 	Limit    int     `json:"limit" form:"limit"`
 	Page     int     `json:"page" form:"page"`
