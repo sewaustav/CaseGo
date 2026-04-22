@@ -54,7 +54,7 @@ func (p *PostgresCaseResultRepo) UpdateProfile(ctx context.Context, result *mode
 
 func (p *PostgresCaseResultRepo) StoreProfile(ctx context.Context, result *models.CaseProfile) error {
 	query, args, err := psql.
-		Insert("case_profiles_hystories").
+		Insert("case_profile_histories").
 		Columns("user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
 		Values(result.UserID, result.TotalCases, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
 		ToSql()
@@ -168,7 +168,7 @@ func (p *PostgresCaseResultRepo) GetProfileByID(ctx context.Context, id int64) (
 func (p *PostgresCaseResultRepo) GetHistoryBy(ctx context.Context, userID int64, from time.Time) ([]*models.CaseProfileHistory, error) {
 	query, args, err := psql.
 		Select("id", "user_id", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
-		From("case_profiles_hystories").
+		From("case_profile_histories").
 		Where(sq.Eq{"user_id": userID}).
 		Where(sq.GtOrEq{"actual_date": from}).
 		OrderBy("actual_date DESC").
