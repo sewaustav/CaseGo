@@ -159,6 +159,6 @@ jobs:
             cd /opt/casego/backend
             git pull
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker-compose pull auth-fastapi auth-migrate
-            docker-compose up -d --no-deps auth-migrate
-            docker-compose up -d --no-deps auth-fastapi
+            docker compose pull auth-fastapi auth-migrate
+            docker compose up -d --no-deps auth-migrate
+            docker compose up -d --no-deps auth-fastapi
