@@ -152,3 +152,9 @@ func (r *PostgresDialogRepo) GetDialogsByCaseID(ctx context.Context, caseID int6
 
 	return res, nil
 }
+
+func (r *PostgresDialogRepo) CountDialogs(ctx context.Context) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM dialogs").Scan(&count)
+	return count, err
+}

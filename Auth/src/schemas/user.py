@@ -18,6 +18,6 @@ class UserResponse(BaseModel):
     id: int = Field(gt=0, description="ID пользователя")
     username: str
     email: EmailStr
-    
+    role: int = 1
 
     model_config = ConfigDict(from_attributes=True)

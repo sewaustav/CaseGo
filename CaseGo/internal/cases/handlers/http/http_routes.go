@@ -20,5 +20,6 @@ func (h *CaseGoHttpHandler) RegisterRoutes(rg *gin.RouterGroup, middleware *rs25
 		routes.POST("/case", h.CreateCaseHandler)
 		routes.PUT("/case/:caseID", h.UpdateCaseHandler)
 		routes.DELETE("/case/:caseID", h.DeleteCaseHandler)
+		routes.GET("/admin/stats", h.GetStatsHandler)
 	}
 }

@@ -239,6 +239,12 @@ func (r *PostgresCaseRepo) PatchCase(ctx context.Context, caseCopy *models.Case)
 	return caseCopy, nil
 }
 
+func (r *PostgresCaseRepo) CountCases(ctx context.Context) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM cases").Scan(&count)
+	return count, err
+}
+
 func (r *PostgresCaseRepo) DeleteCase(ctx context.Context, caseID int64) error {
 	query := psql.Delete("cases").Where(sq.Eq{"id": caseID})
 	sqlStr, args, err := query.ToSql()

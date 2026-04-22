@@ -17,4 +17,5 @@ type CaseRepo interface {
 	PatchCase(ctx context.Context, caseCopy *models.Case) (*models.Case, error)
 
 	DeleteCase(ctx context.Context, caseID int64) error
+	CountCases(ctx context.Context) (int, error)
 }

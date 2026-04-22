@@ -24,6 +24,8 @@ type CaseGoService interface {
 	DeleteCaseService(ctx context.Context, caseID int64, user models.UserIdentity) error
 	PatchCaseService(ctx context.Context, caseID int64, caseDto *dto.NewCaseDto, user models.UserIdentity) (*models.Case, error)
 
+	GetStatsService(ctx context.Context) (*dto.StatsResponse, error)
+
 	//users
 	GetUsersDialogsService(ctx context.Context, user models.UserIdentity, userID int64, limit, offset int) ([]models.Conversation, error)
 	GetUserDialogByIDService(ctx context.Context, user models.UserIdentity, dialogID int64) (*models.Conversation, error)

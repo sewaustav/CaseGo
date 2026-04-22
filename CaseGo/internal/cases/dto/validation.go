@@ -35,6 +35,11 @@ type UserSettingsDto struct {
 	Model    *string `json:"model"`
 }
 
+type StatsResponse struct {
+	TotalCases   int `json:"total_cases"`
+	TotalDialogs int `json:"total_dialogs"`
+}
+
 type StartDialogResponse struct {
 	DialogID      int64  `json:"dialog_id"`
 	CaseID        int64  `json:"case_id"`
