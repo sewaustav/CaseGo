@@ -176,7 +176,7 @@ services:
       REDIS_HOST: casego-redis
       REDIS_PORT: 6379
     ports:
-      - "8081:8080"
+      - "8081:8081"
     depends_on:
       casego-postgres:
         condition: service_healthy
@@ -232,7 +232,7 @@ services:
       POSTGRES_HOST: caseprofile-postgres
       POSTGRES_PORT: 5432
     ports:
-      - "8082:8080"
+      - "8082:8082"
       - "50051:50051"
     depends_on:
       caseprofile-postgres:
