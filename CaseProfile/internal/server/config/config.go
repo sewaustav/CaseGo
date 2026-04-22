@@ -23,10 +23,7 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		return nil
-	}
+	godotenv.Load()
 
 	publicKeyStr := os.Getenv("PUBLIC_KEY")
 	if publicKeyStr == "" {

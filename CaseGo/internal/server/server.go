@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/sewaustav/CaseGoCore/config"
@@ -40,7 +41,7 @@ func New() (*Server, error) {
 	dialogRepo := repository.NewPostgresDialogRepo(database.GetDB())
 	interactionsRepo := repository.NewPostgresInteractionRepo(database.GetDB())
 
-	redisClient, err := cache.New(conf.RedisHost, conf.RedisPassword, 0)
+	redisClient, err := cache.New(fmt.Sprintf("%s:%d", conf.RedisHost, conf.RedisPort), conf.RedisPassword, 0)
 	if err != nil {
 		return nil, err
 	}
