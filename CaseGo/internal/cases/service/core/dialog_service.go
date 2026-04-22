@@ -85,9 +85,9 @@ func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, intera
 
 	return &dto.CaseDto{
 		DialogID: interaction.DialogID,
-		Question: interaction.Question,
+		Question: llmResponse.Question,
 		Model:    llmResponse.Model,
-		Step:     new(interaction.Step + 1),
+		Step:     llmResponse.Step,
 	}, nil
 }
 

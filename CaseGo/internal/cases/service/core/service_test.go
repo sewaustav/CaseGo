@@ -151,18 +151,19 @@ func TestHandleInteractionService(t *testing.T) {
 	dialogRepo.On("GetDialogByID", ctx, int64(1)).Return(&models.Dialog{ID: 1, UserID: 7}, nil)
 	caseRepo.On("GetCaseByID", ctx, mock.Anything).Return(&models.Case{ID: 0}, nil)
 	redisClient.On("GetFullHistory", ctx, int64(1)).Return([]models.Interaction{}, nil)
-	llm.On("GenerateResponse", 
-    ctx, 
-    mock.Anything, // для *models.Case
-    mock.Anything, // для *models.Dialog
-    mock.MatchedBy(func(history []models.Interaction) bool {
-        return len(history) == 1 &&
-            history[0].DialogID == 1 &&
-            history[0].Step == 3 &&
-            history[0].Question == "q" &&
-            history[0].Answer == "a"
-    }),
-).Return(&dto.CaseDto{Model: "gpt"}, nil)
+	nextStep := int32(4)
+	llm.On("GenerateResponse",
+		ctx,
+		mock.Anything,
+		mock.Anything,
+		mock.MatchedBy(func(history []models.Interaction) bool {
+			return len(history) == 1 &&
+				history[0].DialogID == 1 &&
+				history[0].Step == 3 &&
+				history[0].Question == "q" &&
+				history[0].Answer == "a"
+		}),
+	).Return(&dto.CaseDto{Model: "gpt", Question: "next question", Step: &nextStep}, nil)
 	redisClient.On("Push", ctx, mock.MatchedBy(func(inter *models.Interaction) bool {
 		return inter.DialogID == 1 &&
 			inter.Step == 3 &&
@@ -175,7 +176,7 @@ func TestHandleInteractionService(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, got)
 	assert.Equal(t, int64(1), got.DialogID)
-	assert.Equal(t, "q", got.Question)
+	assert.Equal(t, "next question", got.Question)
 	assert.Equal(t, "gpt", got.Model)
 	if assert.NotNil(t, got.Step) {
 		assert.Equal(t, int32(4), *got.Step)
