@@ -27,14 +27,13 @@ func (t *Token) GenerateToken(userID int64, role models.UserRole) (string, error
 		"iss":  "cases",
 		"aud":  "profile",
 		"sub":  strconv.FormatInt(userID, 10),
-		"role": string(rune(role)),
+		"user_role": strconv.Itoa(int(role)),
 		"exp":  time.Now().Add(time.Hour * 1).Unix(),
 		"iat":  time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
-	// Теперь просто передаем объект ключа, парсинг больше не нужен
 	tokenString, err := token.SignedString(t.privateKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to sign token: %w", err)
