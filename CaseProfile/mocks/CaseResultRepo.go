@@ -34,6 +34,36 @@ func (_m *CaseResultRepo) AddResult(ctx context.Context, result *models.CaseResu
 	return r0
 }
 
+// GetResultsByUserID provides a mock function with given fields: ctx, userID
+func (_m *CaseResultRepo) GetResultsByUserID(ctx context.Context, userID int64) ([]*models.CaseResult, error) {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetResultsByUserID")
+	}
+
+	var r0 []*models.CaseResult
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) ([]*models.CaseResult, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []*models.CaseResult); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.CaseResult)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteResultByID provides a mock function with given fields: ctx, id
 func (_m *CaseResultRepo) DeleteResultByID(ctx context.Context, id int64) error {
 	ret := _m.Called(ctx, id)

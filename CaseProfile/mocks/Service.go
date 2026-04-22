@@ -37,23 +37,23 @@ func (_m *Service) DeleteResultByIDService(ctx context.Context, id int64, user m
 }
 
 // GetHistoryService provides a mock function with given fields: ctx, user, from
-func (_m *Service) GetHistoryService(ctx context.Context, user models.UserIdentity, from time.Time) ([]*models.CaseProfileHistory, error) {
+func (_m *Service) GetHistoryService(ctx context.Context, user models.UserIdentity, from time.Time) ([]*models.CaseResult, error) {
 	ret := _m.Called(ctx, user, from)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetHistoryService")
 	}
 
-	var r0 []*models.CaseProfileHistory
+	var r0 []*models.CaseResult
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity, time.Time) ([]*models.CaseProfileHistory, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity, time.Time) ([]*models.CaseResult, error)); ok {
 		return rf(ctx, user, from)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity, time.Time) []*models.CaseProfileHistory); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity, time.Time) []*models.CaseResult); ok {
 		r0 = rf(ctx, user, from)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.CaseProfileHistory)
+			r0 = ret.Get(0).([]*models.CaseResult)
 		}
 	}
 
