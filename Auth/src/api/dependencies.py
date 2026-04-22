@@ -3,8 +3,6 @@ from typing import Annotated, AsyncGenerator, Optional
 
 from core.config import get_settings
 
-# from rabbit.producer import RabbitMQClient
-from core.redis_client import RedisClient
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from models.user import User
@@ -16,25 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 settings = get_settings()
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_PREFIX}/auth/token",
-    auto_error=False  
+    auto_error=False
 )
 google_oauth = GoogleOAUTH(client_id=settings.GOOGLE_CLIENT_ID)
-
-
-# async def get_rabbitmq(request: Request) -> RabbitMQClient:
-# 	"""Зависимость для RabbitMQ клиента."""
-# 	rabbitmq = request.state.rabbitmq
-# 	if not rabbitmq:
-# 		raise HTTPException(status_code=500, detail="RabbitMQ client not initialized")
-# 	return rabbitmq
-
-
-async def get_redis_client(request: Request) -> RedisClient:
-    """Зависимость для redis клиента."""
-    redis_client = request.state.redis_client
-    if not redis_client:
-        raise HTTPException(status_code=500, detail="Redis client not initialized")
-    return redis_client
 
 
 async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
