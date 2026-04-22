@@ -206,9 +206,10 @@ func (g *GigaChatService) GenerateResponse(ctx context.Context, caseModel *model
 		{Role: "system", Content: systemPrompt},
 	}
 	for _, inter := range history {
-		messages = append(messages, gcMessage{Role: "user", Content: inter.Answer})
 		messages = append(messages, gcMessage{Role: "assistant", Content: inter.Question})
-		
+		if inter.Answer != "" {
+			messages = append(messages, gcMessage{Role: "user", Content: inter.Answer})
+		}
 	}
 
 	resp, err := g.chat(ctx, messages, 0.8)
