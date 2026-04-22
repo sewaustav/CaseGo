@@ -39,6 +39,22 @@ async def get_user_by_username(username: str,
     return user
 
 
+async def get_all_users(db: AsyncSession) -> list[User]:
+    stmt = select(User).order_by(User.id)
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
+
+async def update_user_role(user_id: int, role: int, db: AsyncSession) -> Optional[User]:
+    user = await get_user_by_id(user_id, db)
+    if user is None:
+        return None
+    user.role = role
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
 async def create_user(user_create: UserCreate, db: AsyncSession) -> User:
     """Добавляет объект user в сессию, но не делает commit.
        Возвращает ORM-объект; refresh нужно сделать вне или внутри транзакции."""

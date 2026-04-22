@@ -13,6 +13,7 @@ type DialogRepo interface {
 	GetDialogByID(ctx context.Context, dialogID int64) (*models.Dialog, error)
 	GetUserDialogs(ctx context.Context, userID int64, limit, offset int) ([]models.Dialog, error)
 	GetDialogsByCaseID(ctx context.Context, caseID int64, limit, offset int) ([]models.Dialog, error)
+	CountDialogs(ctx context.Context) (int, error)
 }
 
 type Interaction interface {
