@@ -23,7 +23,9 @@ type Config struct {
 	RedisPort     int
 	RedisPassword string
 
-	LLMURL string
+	LLMURL          string
+	LLMProvider     string // "deepseek" | "gigachat"
+	GigaChatAuthKey string
 
 	GRPCSEVER string
 
@@ -76,8 +78,10 @@ func LoadConfig() *Config {
 		RedisHost:     os.Getenv("REDIS_HOST"),
 		RedisPort:     redisPort,
 		RedisPassword: os.Getenv("REDIS_PASSWORD"),
-		LLMURL:        os.Getenv("LLM_URL"),
-		GRPCSEVER:     os.Getenv("GRPC_SEVER"),
+		LLMURL:          os.Getenv("LLM_URL"),
+		LLMProvider:     os.Getenv("LLM_PROVIDER"),
+		GigaChatAuthKey: os.Getenv("GIGACHAT_AUTH_KEY"),
+		GRPCSEVER:       os.Getenv("GRPC_SEVER"),
 	}
 }
 
