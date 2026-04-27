@@ -204,6 +204,10 @@ func (s *ProfileService) GetUserProfileService(ctx context.Context, usr models.U
 		return nil, err
 	}
 
+	if profile.UserID != usr.UserID {
+		return nil, err
+	}
+
 	if !profile.IsActive {
 		return nil, apperr.ErrIsNotActive
 	}
@@ -250,6 +254,22 @@ func (s *ProfileService) GetUserProfileByIDService(ctx context.Context, usr mode
 		UsrPurposes: purposes,
 		UsrSocials:  links,
 	}, nil
+}
+
+func (s *ProfileService) GetAllUsersService(ctx context.Context, usr models.UserIdentity, limit, page int) ([]models.Profile, error) {
+	if usr.Role != models.Admin {
+		return nil, fmt.Errorf("user is not admin")
+	}
+
+	offset := (page - 1) * limit
+
+	users, err := s.repo.GetAllUsers(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+
 }
 
 func (s *ProfileService) DeletePurposeService(ctx context.Context, id int64, usr models.UserIdentity) error {
