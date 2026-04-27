@@ -377,6 +377,44 @@ func (h *ProfileHandler) UpdatePurposeHandler(c *gin.Context) {
 
 // Get
 
+func (h *ProfileHandler) GetAllUsersHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var userInfo models.UserIdentity
+	userInfo.Role = role
+	userInfo.UserID = userID
+
+	limitStr := c.Query("limit") 
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "limit is required"})
+		return
+	}
+
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr) 
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "limit is required"})
+		return
+	}
+
+	
+	users, err := h.service.GetAllUsersService(ctx, userInfo, limit, page)
+	if err != nil {
+		c.Status(http.StatusForbidden)
+		return 
+	}
+
+	c.JSON(http.StatusOK, users)
+
+}
+
 // GetUserProfileHandler godoc
 // @Summary Получить свой профиль
 // @Tags profile
