@@ -22,7 +22,7 @@ type ProfileRepo interface {
 	GetUserProfile(ctx context.Context, userID int64) (*models.Profile, error)
 	GetUserSocials(ctx context.Context, userID int64) ([]models.UserSocialLink, error)
 	GetUserPurposes(ctx context.Context, userID int64) ([]models.UserPurpose, error)
-	GetAllUsers(ctx context.Context, limit int) ([]models.Profile, error)
+	GetAllUsers(ctx context.Context, limit, offset int) ([]models.Profile, error)
 
 	UpdateProfile(ctx context.Context, user *models.Profile) (*models.Profile, error)
 	PatchProfile(ctx context.Context, userID int64, updates dto.UpdateProfilePartialDTO) (*models.Profile, error) // todo - write dto for method

@@ -204,8 +204,8 @@ func (r *PostgresProfileRepo) GetUserPurposes(ctx context.Context, userID int64)
 	return purposes, nil
 }
 
-func (r *PostgresProfileRepo) GetAllUsers(ctx context.Context, limit int) ([]models.Profile, error) {
-	sqlStr, args, err := psql.Select(profileColumns...).From("profiles").Where(sq.Eq{"is_active": true}).Limit(uint64(limit)).ToSql()
+func (r *PostgresProfileRepo) GetAllUsers(ctx context.Context, limit, offset int) ([]models.Profile, error) {
+	sqlStr, args, err := psql.Select(profileColumns...).From("profiles").Where(sq.Eq{"is_active": true}).Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
 	if err != nil {
 		return nil, err
 	}

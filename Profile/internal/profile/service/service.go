@@ -15,6 +15,7 @@ type ProfileCore interface {
 	PatchProfileService(ctx context.Context, usr models.UserIdentity, req dto.UpdateProfilePartialDTO) (*models.Profile, error)
 	GetUserProfileService(ctx context.Context, usr models.UserIdentity) (*models.UserProfile, error)
 	GetUserProfileByIDService(ctx context.Context, usr models.UserIdentity, id int64) (*models.UserProfile, error)
+	GetAllUsersService(ctx context.Context, usr models.UserIdentity, limit, page int) ([]models.Profile, error)
 	DeleteProfileService(ctx context.Context, usr models.UserIdentity) error
 	DeleteProfileWithoutRecoveryService(ctx context.Context, usr models.UserIdentity, userID int64) error
 
