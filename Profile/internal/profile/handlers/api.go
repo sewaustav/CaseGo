@@ -11,12 +11,13 @@ func (h *ProfileHandler) RegisterRoutes(rg *gin.RouterGroup, jwtMiddleWare *rs25
 	{
 		routers.POST("", h.CreateProfileHandler)
 		routers.GET("", h.GetUserProfileHandler)
+		routers.GET("/all", h.GetAllUsersHandler)
 		routers.GET("/:id", h.GetUserByProfileIDHandler)
 		routers.PUT("", h.UpdateProfileHandler)
 		routers.PATCH("", h.PatchProfileHandler)
 		routers.DELETE("", h.DeleteProfileHandler)
 		routers.DELETE("/:id", h.HardDeleteHandler)
-
+		
 		routers.POST("/social", h.AddSocialLinkHandler)
 		routers.PUT("/social/:id", h.UpdateLinkHandler)
 		routers.DELETE("/social/:id", h.DeleteSocialLinkHandler)

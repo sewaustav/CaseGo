@@ -48,3 +48,4 @@ type UpdateProfilePartialDTO struct {
 type ProfessionDTO struct {
 	ProfessionID int16 `json:"profession_id" validate:"required"`
 }
+
