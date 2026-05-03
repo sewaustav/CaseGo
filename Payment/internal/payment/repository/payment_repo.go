@@ -21,7 +21,7 @@ type PaymentRepo interface {
 	GetPaymentByID(ctx context.Context, id int64) (*models.PaymentInfo, error)
 	GetPaymentByTransactionID(ctx context.Context, id string) (*models.PaymentInfo, error)
 
-	UpdateSubscription(ctx context.Context, id int64, sub *dto.UpadateSubcriptionInfoDto) error
+	UpdateSubscription(ctx context.Context, userID int64, sub *dto.UpadateSubcriptionInfoDto) error
 
 	DeleteUser(ctx context.Context, userID int64) error
 }

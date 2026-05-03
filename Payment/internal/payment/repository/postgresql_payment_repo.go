@@ -109,8 +109,8 @@ func (r *PostgresPaymentRepo) GetUserPayments(ctx context.Context, userID int64,
 	return payments, nil
 }
 
-func (r *PostgresPaymentRepo) UpdateSubscription(ctx context.Context, id int64, sub *dto.UpadateSubcriptionInfoDto) error {
-	builder := psql.Update("subscription_info").Where(sq.Eq{"id": id})
+func (r *PostgresPaymentRepo) UpdateSubscription(ctx context.Context, userID int64, sub *dto.UpadateSubcriptionInfoDto) error {
+	builder := psql.Update("subscription_info").Where(sq.Eq{"userID": userID})
 
 	if sub.Subscription != nil {
 		builder = builder.Set("subscription", *sub.Subscription)
