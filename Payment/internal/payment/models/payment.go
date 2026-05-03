@@ -34,3 +34,16 @@ type PaymentInfo struct {
 	Status         string    `db:"status" json:"status"`
 	PaymentDate    time.Time `db:"payment_date" json:"payment_date"`
 }
+
+type UserRole int
+
+const (
+	Admin UserRole = iota
+	User
+	Creator
+)
+
+type UserIdentity struct {
+	UserID int64
+	Role   *UserRole
+}
