@@ -14,7 +14,7 @@ type PaymentGRPCHandler struct {
 	service service.PaymentApiService
 }
 
-func NewPaymentGRPCHandler(service *service.PaymentApiCore) *PaymentGRPCHandler {
+func NewPaymentGRPCHandler(service service.PaymentApiService) *PaymentGRPCHandler {
 	return &PaymentGRPCHandler{
 		service: service,
 	}

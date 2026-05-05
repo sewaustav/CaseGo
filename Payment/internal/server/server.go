@@ -7,11 +7,14 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/sewaustav/Payment/internal/api"
 	"github.com/sewaustav/Payment/internal/db"
 	grpc_hadler "github.com/sewaustav/Payment/internal/payment/handler/grpc"
+	http_handler "github.com/sewaustav/Payment/internal/payment/handler/http"
 	"github.com/sewaustav/Payment/internal/payment/repository"
 	service "github.com/sewaustav/Payment/internal/payment/service/api"
 	"github.com/sewaustav/Payment/internal/server/config"
+	"github.com/sewaustav/Payment/pkg/middleware/rs256"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -42,10 +45,16 @@ func New() (*Server, error) {
 	}
 
 	repo := repository.NewPostgresPaymentRepo(database.GetDB())
-
 	paymentService := service.NewPaymentService(repo)
-
 	grpcHadler := grpc_hadler.NewPaymentGRPCHandler(paymentService)
+	authJwtMiddleware := rs256.New(conf.PublicKey, "auth", "all")
+	httpHandler := http_handler.NewHttpHandler(paymentService)
+
+	httpRoutes := api.SetupRoutes(httpHandler, *authJwtMiddleware)
+	srv := &http.Server{
+		Addr: ":8085",
+		Handler: httpRoutes,
+	}
 
 	serverCert, err := tls.LoadX509KeyPair("certs/payment.crt", "certs/payment.key")
 	if err != nil {
@@ -76,5 +85,6 @@ func New() (*Server, error) {
 	return &Server{
 		DB:   database,
 		GRPC: grpcServer,
+		HTTP: srv,
 	}, nil
 }
