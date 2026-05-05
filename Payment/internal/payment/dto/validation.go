@@ -12,6 +12,11 @@ type UpadateSubcriptionInfoDto struct {
 	IsRenew      bool
 }
 
+type PatchSubcriptionInfoDto struct {
+	Subscription *models.SubscriptionType `json:"subscription" validate:"omitempty"`
+	IsAutoRenew  *bool                    `json:"is_auto_renew" validate:"omitempty"`
+}
+
 type SubscriptionStatusDto struct {
 	Status    int       `db:"subscription" json:"subscription"`
 	ExpiredAt time.Time `db:"expired_at" json:"expired_at"`
