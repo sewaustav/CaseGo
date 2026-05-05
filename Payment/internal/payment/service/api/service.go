@@ -14,7 +14,7 @@ type PaymentApiService interface {
 	
 	UpdateSubscriptionInfoService(ctx context.Context, usr models.UserIdentity, sub dto.UpadateSubcriptionInfoDto) error
 	
-	DeleteUserService(ctx context.Context, usr models.UserIdentity) error
+	DeleteUserService(ctx context.Context, usr models.UserIdentity, userID int64) error
 
 	// for admin
 	GetUserProfileService(ctx context.Context, usr models.UserIdentity, userID int64) (*models.SubscriptionInfo, error)

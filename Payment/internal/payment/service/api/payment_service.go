@@ -38,6 +38,9 @@ func (s *PaymentApiCore) GetSubscriptionInfoService(ctx context.Context, usr mod
 }
 
 func (s *PaymentApiCore) GetMyPaymentsService(ctx context.Context, usr models.UserIdentity, limit, page int) ([]models.PaymentInfo, error) {
+	if limit > 50 {
+		limit = 50
+	}
 	offset := (page - 1) * limit 
 	payments, err := s.repo.GetUserPayments(ctx, usr.UserID, limit, offset)
 	if err != nil {
@@ -61,12 +64,12 @@ func (s *PaymentApiCore) UpdateSubscriptionInfoService(ctx context.Context, usr 
 	return nil
 }
 
-func (s *PaymentApiCore) DeleteUserService(ctx context.Context, usr models.UserIdentity) error {
+func (s *PaymentApiCore) DeleteUserService(ctx context.Context, usr models.UserIdentity, userID int64) error {
 	if usr.Role != nil && *usr.Role != models.Admin {
 		return fmt.Errorf("user is not admin")
 	}
 
-	if err := s.repo.DeleteUser(ctx, usr.UserID); err != nil {
+	if err := s.repo.DeleteUser(ctx, userID); err != nil {
 		return err 
 	}
 
@@ -92,6 +95,10 @@ func (s *PaymentApiCore) GetUsersPaymentsService(ctx context.Context, usr models
 	if usr.Role != nil && *usr.Role != models.Admin {
 		return nil, fmt.Errorf("user is not admin")
 	} 
+	
+	if limit > 50 {
+		limit = 50
+	}
 
 	offset := (page - 1) * limit
 
