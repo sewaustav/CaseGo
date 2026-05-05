@@ -184,3 +184,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+certs/*.key
+certs/*.srl
+certs/*.p12
+certs/*.pfx
+certs/*.crt
+certs/*.pem

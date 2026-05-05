@@ -13,6 +13,12 @@ type PaymentApiCore struct {
 	repo repository.PaymentRepo
 }
 
+func NewPaymentService(repo repository.PaymentRepo) *PaymentApiCore {
+	return &PaymentApiCore{
+		repo: repo,
+	}
+}
+
 func (s *PaymentApiCore) GetStatusService(ctx context.Context, usr models.UserIdentity) (*dto.SubscriptionStatusDto, error) {
 	status, err := s.repo.GetSubscriptionStatus(ctx, usr.UserID)
 	if err != nil {
@@ -119,6 +125,8 @@ func (s *PaymentApiCore) GetPaymentByIDService(ctx context.Context, usr models.U
 	if err != nil {
 		return nil, err 
 	}
+
+	
 
 	return payment, nil
 }
