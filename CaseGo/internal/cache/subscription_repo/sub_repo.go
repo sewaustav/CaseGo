@@ -63,7 +63,3 @@ func (r *repo) GetSubInfo(
 
 	return &sub, nil
 }
-
-func (r *repo) Close() error {
-	return r.client.Close()
-}
