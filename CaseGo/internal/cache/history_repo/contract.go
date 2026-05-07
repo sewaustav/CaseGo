@@ -11,5 +11,4 @@ type Interactor interface {
 	GetFullHistory(ctx context.Context, dialogID int64) ([]models.Interaction, error)
 	DeleteLast(ctx context.Context, dialogID int64) error
 	Clear(ctx context.Context, dialogID int64) error
-	Close() error
 }

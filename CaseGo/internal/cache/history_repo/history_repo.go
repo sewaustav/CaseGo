@@ -73,7 +73,3 @@ func (r *repo) DeleteLast(ctx context.Context, dialogID int64) error {
 func (r *repo) Clear(ctx context.Context, dialogID int64) error {
 	return r.client.Del(ctx, r.makeKey(dialogID)).Err()
 }
-
-func (r *repo) Close() error {
-	return r.client.Close()
-}
