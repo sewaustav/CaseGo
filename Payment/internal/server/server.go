@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 
+	pb "github.com/sewaustav/CaseGogRPServer/gen/go/payments"
 	"github.com/sewaustav/Payment/internal/api"
 	"github.com/sewaustav/Payment/internal/db"
 	grpc_hadler "github.com/sewaustav/Payment/internal/payment/handler/grpc"
@@ -62,7 +63,7 @@ func New() (*Server, error) {
 	}
 
 	certPool := x509.NewCertPool()
-	caCert, err := ioutil.ReadFile("certs/ca.crt")
+	caCert, err := os.ReadFile("certs/ca.crt")
 	if err != nil {
 		return nil, fmt.Errorf("не удалось прочитать ca.crt: %w", err)
 	}
@@ -80,7 +81,7 @@ func New() (*Server, error) {
 
 	creds := credentials.NewTLS(tlsConfig)
 	grpcServer := grpc.NewServer(grpc.Creds(creds))
-	_ = grpcHadler
+	pb.RegisterPaymentCheckServiceServer(grpcServer, grpcHadler)
 
 	return &Server{
 		DB:   database,
