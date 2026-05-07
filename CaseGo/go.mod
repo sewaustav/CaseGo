@@ -11,7 +11,7 @@ require (
 	github.com/lib/pq v1.12.0
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/sashabaranov/go-openai v1.41.2
-	github.com/sewaustav/CaseGogRPServer v0.0.0-20260328220114-77ccc5e550c7
+	github.com/sewaustav/CaseGogRPServer v0.0.0-20260505122824-3d6bf63be1a3
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11

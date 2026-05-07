@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/sewaustav/CaseGoCore/internal/cache"
+	"github.com/sewaustav/CaseGoCore/internal/cache/history_repo"
+	"github.com/sewaustav/CaseGoCore/internal/cache/subscription_repo"
 	"github.com/sewaustav/CaseGoCore/internal/cases/dto"
 	"github.com/sewaustav/CaseGoCore/internal/cases/handlers/grpc"
 	"github.com/sewaustav/CaseGoCore/internal/cases/models"
@@ -32,21 +33,25 @@ type CaseGoService interface {
 }
 
 type CaseGoCoreService struct {
-	redisClient     cache.Interactor
+	redisClient     history_repo.Interactor
+	subRedisClient  subscription_repo.SubscriptionInfo
 	caseGoRepo      repository.CaseRepo
 	dialogRepo      repository.DialogRepo
 	interactionRepo repository.Interaction
 	llmService      llm_service.LLM
 	grpcHandler     grpc.GRPCService
+	paymentCheck    grpc.PaymentGrpcClient
 }
 
-func NewCaseGoCoreService(redisClient cache.Interactor, caseGoRepo repository.CaseRepo, dialogRepo repository.DialogRepo, interactionRepo repository.Interaction, llm_service llm_service.LLM, grpc grpc.GRPCService) *CaseGoCoreService {
+func NewCaseGoCoreService(redisClient history_repo.Interactor, subRedisClient subscription_repo.SubscriptionInfo, caseGoRepo repository.CaseRepo, dialogRepo repository.DialogRepo, interactionRepo repository.Interaction, llm_service llm_service.LLM, grpc grpc.GRPCService, paymentCheck grpc.PaymentGrpcClient) *CaseGoCoreService {
 	return &CaseGoCoreService{
 		redisClient:     redisClient,
+		subRedisClient:  subRedisClient,
 		caseGoRepo:      caseGoRepo,
 		dialogRepo:      dialogRepo,
 		interactionRepo: interactionRepo,
 		llmService:      llm_service,
 		grpcHandler:     grpc,
+		paymentCheck:    paymentCheck,
 	}
 }
