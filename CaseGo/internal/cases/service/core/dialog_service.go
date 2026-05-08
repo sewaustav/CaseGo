@@ -13,6 +13,16 @@ import (
 )
 
 func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*dto.StartDialogResponse, error) {
+	subInfo, err := s.getSubscriptionInfo(ctx, user.UserID)
+	if err != nil {
+		return nil, apperrors.NewInternal("failed to get your subscription info", err)
+	}
+
+	ok, err := s.isSubscriptionValid(ctx, subInfo, 10)
+	if !ok {
+		return nil, err
+	}
+	
 	caseModel, err := s.caseGoRepo.GetCaseByID(ctx, caseID)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {
@@ -38,6 +48,15 @@ func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64
 }
 
 func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto, user models.UserIdentity) (*dto.CaseDto, error) {
+	subInfo, err := s.getSubscriptionInfo(ctx, user.UserID)
+	if err != nil {
+		return nil, apperrors.NewInternal("failed to get your subscription info", err)
+	}
+
+	ok, err := s.isSubscriptionValid(ctx, subInfo, 2)
+	if !ok {
+		return nil, err
+	}
 	if interaction == nil {
 		return nil, apperrors.NewBadRequest("interaction data is required", nil)
 	}
