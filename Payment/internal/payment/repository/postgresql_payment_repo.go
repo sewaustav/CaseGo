@@ -39,15 +39,22 @@ func (r *PostgresPaymentRepo) Begin(ctx context.Context) (Tx, error) {
 var psql = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 func (r *PostgresPaymentRepo) InitSubscription(ctx context.Context, sub *models.SubscriptionInfo) (*models.SubscriptionInfo, error) {
-	query := psql.Insert("subscription_info").
-		Columns("user_id", "subscription", "first_payment_date", "count_of_renewal", "is_auto_renew", "last_payment_date", "expired_at").
-		Values(sub.UserID, sub.Subscription, sub.FirstPaymentDate, sub.CountOfRenewal, sub.IsAutoRenew, sub.LastPaymentDate, sub.ExpiredAt).
-		Suffix("RETURNING id")
+	builder := psql.Insert("subscription_info").
+		Columns("user_id", "subscription", "count_of_renewal", "is_auto_renew", "expired_at").
+		Values(sub.UserID, sub.Subscription, sub.CountOfRenewal, sub.IsAutoRenew, sub.ExpiredAt)
+
+	if sub.FirstPaymentDate != nil {
+		builder = builder.Columns("first_payment_date").Values(sub.FirstPaymentDate)
+	}
+	if sub.LastPaymentDate != nil {
+		builder = builder.Columns("last_payment_date").Values(sub.LastPaymentDate)
+	}
+	
+	query := builder.Suffix("RETURNING id")
 
 	err := query.RunWith(r.db).QueryRowContext(ctx).Scan(&sub.ID)
 	return sub, err
 }
-
 func (r *PostgresPaymentRepo) CreatePayment(ctx context.Context, p *models.PaymentInfo) (*models.PaymentInfo, error) {
 	query := psql.Insert("payment_info").
 		Columns("user_id", "subscription_id", "transaction_id", "price", "currency", "status", "payment_date").
@@ -109,7 +116,7 @@ func (r *PostgresPaymentRepo) GetUserPayments(ctx context.Context, userID int64,
 	return payments, nil
 }
 
-func (r *PostgresPaymentRepo) UpdateSubscription(ctx context.Context, userID int64, sub *dto.UpadateSubcriptionInfoDto) error {
+func (r *PostgresPaymentRepo) UpdateSubscription(ctx context.Context, userID int64, sub *dto.UpdateSubscriptionInfoDto) error {
 	builder := psql.Update("subscription_info").Where(sq.Eq{"userID": userID})
 
 	if sub.Subscription != nil {
@@ -117,6 +124,9 @@ func (r *PostgresPaymentRepo) UpdateSubscription(ctx context.Context, userID int
 	}
 	if sub.IsAutoRenew != nil {
 		builder = builder.Set("is_auto_renew", *sub.IsAutoRenew)
+	}
+	if sub.ExpiredAt != nil {
+		builder = builder.Set("expired_at", *sub.ExpiredAt)
 	}
 	if sub.IsRenew {
 		builder = builder.Set("count_of_renewal", sq.Expr("count_of_renewal + 1")).

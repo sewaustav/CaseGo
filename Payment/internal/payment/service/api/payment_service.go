@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/sewaustav/Payment/internal/payment/dto"
 	"github.com/sewaustav/Payment/internal/payment/models"
@@ -17,6 +18,22 @@ func NewPaymentService(repo repository.PaymentRepo) *PaymentApiCore {
 	return &PaymentApiCore{
 		repo: repo,
 	}
+}
+
+func (s *PaymentApiCore) RegisterUser(ctx context.Context, usr models.UserIdentity) error {
+	now := time.Now()
+	_, err := s.repo.InitSubscription(ctx, &models.SubscriptionInfo{
+		UserID: usr.UserID,
+		Subscription: models.NoSubscription,
+		CountOfRenewal: 0,
+		IsAutoRenew: false,
+		ExpiredAt: now,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *PaymentApiCore) GetStatusService(ctx context.Context, usr models.UserIdentity) (*dto.SubscriptionStatusDto, error) {
@@ -51,8 +68,8 @@ func (s *PaymentApiCore) GetMyPaymentsService(ctx context.Context, usr models.Us
 	
 }
 
-func (s *PaymentApiCore) UpdateSubscriptionInfoService(ctx context.Context, usr models.UserIdentity, sub dto.UpadateSubcriptionInfoDto) error {
-	changes := &dto.UpadateSubcriptionInfoDto{
+func (s *PaymentApiCore) UpdateSubscriptionInfoService(ctx context.Context, usr models.UserIdentity, sub dto.UpdateSubscriptionInfoDto) error {
+	changes := &dto.UpdateSubscriptionInfoDto{
 		Subscription: sub.Subscription,
 		IsAutoRenew: sub.IsAutoRenew,
 		IsRenew: false,
@@ -77,6 +94,88 @@ func (s *PaymentApiCore) DeleteUserService(ctx context.Context, usr models.UserI
 }
 
 // admins only 
+func (s *PaymentApiCore) GiftSubscription(ctx context.Context, usr models.UserIdentity, userID int64) error {
+	if usr.Role == nil {
+		return fmt.Errorf("role is required")
+	}
+
+	if *usr.Role != models.Admin {
+		return fmt.Errorf("user is not admin")
+	}
+
+	subInfo, err := s.repo.GetUserSubscriptionInfo(ctx, userID) 
+	if err != nil {
+		return fmt.Errorf("internal %s", err)
+	}
+
+	if subInfo != nil && subInfo.Subscription > 0 {
+		return fmt.Errorf("user already has an active subscription")
+	}
+
+	now := time.Now()
+
+	tx, err := s.repo.Begin(ctx)
+	if err != nil {
+		return err 
+	}
+
+	defer tx.Rollback()
+
+	txRepo := s.repo.WithTx(tx)
+
+	var subID int64
+	
+	if subInfo == nil {
+		
+		sub, err := txRepo.InitSubscription(ctx, &models.SubscriptionInfo{
+			UserID: userID,
+			Subscription: models.Basic,
+			CountOfRenewal: 1,
+			IsAutoRenew: false,
+			FirstPaymentDate: &now,
+			LastPaymentDate: &now,
+			ExpiredAt: now.AddDate(0, 1, 0),
+		})
+
+		if err != nil {
+			return err 
+		}
+
+		subID = sub.ID
+		
+	} else {
+		subType := models.Basic
+		newSubDate := now.AddDate(0, 1, 0)
+		err := txRepo.UpdateSubscription(ctx, userID, &dto.UpdateSubscriptionInfoDto{
+			IsRenew:      false,
+			Subscription: &subType, 
+			ExpiredAt: &newSubDate,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to update sub: %w", err)
+		}
+		subID = subInfo.ID
+	}
+
+	_, err = txRepo.CreatePayment(ctx, &models.PaymentInfo{
+		UserID:         userID,
+		SubscriptionID: &subID,
+		Price:          0,
+		Currency:       "RUB",
+		Status:         "gift",
+		PaymentDate:    now,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create payment: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit tx: %w", err)
+	}
+
+	return nil
+
+}
 
 func (s *PaymentApiCore) GetUserProfileService(ctx context.Context, usr models.UserIdentity, userID int64) (*models.SubscriptionInfo, error) {
 	if usr.Role != nil && *usr.Role != models.Admin {

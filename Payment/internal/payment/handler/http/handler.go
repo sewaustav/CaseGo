@@ -87,7 +87,7 @@ func (h *PaymentHttpHandler) UpdateSubscriptionHandler(c *gin.Context) {
 		return
 	}
 	
-	req := dto.UpadateSubcriptionInfoDto{
+	req := dto.UpdateSubscriptionInfoDto{
 		Subscription: body.Subscription,
 		IsAutoRenew: body.IsAutoRenew,
 		IsRenew: false,

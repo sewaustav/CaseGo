@@ -2,10 +2,10 @@ CREATE TABLE subscription_info (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     subscription INTEGER NOT NULL CHECK (subscription >= 0 AND subscription <=2),
-    first_payment_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    first_payment_date TIMESTAMP WITH TIME ZONE,
     count_of_renewal INTEGER NOT NULL DEFAULT 0,
     is_auto_renew BOOL DEFAULT FALSE,
-    last_payment_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_payment_date TIMESTAMP WITH TIME ZONE,
     canceled_at TIMESTAMP WITH TIME ZONE,
     expired_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
