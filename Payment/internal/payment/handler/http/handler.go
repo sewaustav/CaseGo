@@ -20,12 +20,34 @@ func NewHttpHandler(service service.PaymentApiService) *PaymentHttpHandler {
 	}
 }
 
+func (h *PaymentHttpHandler) RegisterUserHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no such user"})
+		return
+	}
+
+	user := models.UserIdentity{
+		UserID: userID,
+		Role: &role,
+	}
+
+	if err := h.service.RegisterUserService(ctx, user); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
 func (h *PaymentHttpHandler) GetMySubscriptionInfoHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userID, role, exist := h.GetUserID(c)
 	if !exist {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no sach user"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no such user"})
 		return
 	}
 
@@ -48,7 +70,7 @@ func (h *PaymentHttpHandler) GetMyPaymentsHandler(c *gin.Context) {
 
 	userID, role, exist := h.GetUserID(c)
 	if !exist {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no sach user"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no such user"})
 		return
 	}
 
@@ -95,7 +117,7 @@ func (h *PaymentHttpHandler) UpdateSubscriptionHandler(c *gin.Context) {
 
 	userID, role, exist := h.GetUserID(c)
 	if !exist {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no sach user"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no such user"})
 		return
 	}
 
@@ -113,6 +135,34 @@ func (h *PaymentHttpHandler) UpdateSubscriptionHandler(c *gin.Context) {
 }
 
 // admin only 
+func (h *PaymentHttpHandler) GiftSubscriptionHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userID, role, exist := h.GetUserID(c)
+	if !exist {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "no such user"})
+		return
+	}
+
+	user := models.UserIdentity{
+		UserID: userID,
+		Role: &role,
+	}
+
+	var req dto.GiftSubscription
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	if err := h.service.GiftSubscription(ctx, user, req.UserID); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 func (h *PaymentHttpHandler) DeleteUserHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 

@@ -20,7 +20,7 @@ func NewPaymentService(repo repository.PaymentRepo) *PaymentApiCore {
 	}
 }
 
-func (s *PaymentApiCore) RegisterUser(ctx context.Context, usr models.UserIdentity) error {
+func (s *PaymentApiCore) RegisterUserService(ctx context.Context, usr models.UserIdentity) error {
 	now := time.Now()
 	_, err := s.repo.InitSubscription(ctx, &models.SubscriptionInfo{
 		UserID: usr.UserID,

@@ -8,7 +8,7 @@ import (
 )
 
 type PaymentApiService interface {
-	RegisterUser(ctx context.Context, usr models.UserIdentity) error
+	RegisterUserService(ctx context.Context, usr models.UserIdentity) error
 	GetStatusService(ctx context.Context, usr models.UserIdentity) (*dto.SubscriptionStatusDto, error)
 	GetSubscriptionInfoService(ctx context.Context, usr models.UserIdentity) (*models.SubscriptionInfo, error)
 	GetMyPaymentsService(ctx context.Context, usr models.UserIdentity, limit, page int) ([]models.PaymentInfo, error)

@@ -22,3 +22,7 @@ type SubscriptionStatusDto struct {
 	Status    int       `db:"subscription" json:"subscription"`
 	ExpiredAt time.Time `db:"expired_at" json:"expired_at"`
 }
+
+type GiftSubscription struct {
+	UserID int64 `json:"user_id"`
+}
