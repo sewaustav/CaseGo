@@ -72,3 +72,8 @@ type Result struct {
 	SkillsRating Skills    `json:"skills_rating"`
 	FinishedAt   time.Time `json:"finished_at"`
 }
+
+type SubscriptionStatusDto struct {
+	Status    int32       `db:"subscription" json:"subscription"`
+	ExpiredAt time.Time `db:"expired_at" json:"expired_at"`
+}
