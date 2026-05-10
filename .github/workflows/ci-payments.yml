@@ -1,16 +1,16 @@
-name: CI - Profile (Go)
+name: CI - Payment (Go)
 
 on:
   push:
-    branches: [main, develop,'feature/**', 'feat/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
-      - 'Profile/**'
-      - '.github/workflows/ci-profile.yml'
+      - 'Payment/**'
+      - '.github/workflows/ci-payment.yml'
   pull_request:
     branches: [main, develop, 'feature/**', 'feat/**']
     paths:
-      - 'Profile/**'
-      - '.github/workflows/ci-profile.yml'
+      - 'Payment/**'
+      - '.github/workflows/ci-payment.yml'
 
 jobs:
   test:
@@ -19,7 +19,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: Profile
+        working-directory: Payment
 
     steps:
       - name: Checkout
@@ -28,17 +28,20 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: Profile/go.mod
-          cache-dependency-path: Profile/go.sum
+          go-version-file: Payment/go.mod
+          cache-dependency-path: Payment/go.sum
+
+      - name: Configure git for private modules
+        run: git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Download dependencies
+        run: go mod download
 
       - name: Vet
         run: go vet ./...
 
       - name: Test
         run: go test ./... -race -coverprofile=coverage.out
-
-      - name: Build
-        run: go build ./cmd/caseGo/...
 
   docker:
     name: Docker Build & Push
@@ -65,15 +68,15 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./Profile
+          context: ./Payment
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/casego-profile:latest
-          build-args: SERVICE_NAME=caseGo
+          tags: ghcr.io/${{ github.repository_owner }}/casego-payment:latest
+          build-args: GITHUB_TOKEN=${{ secrets.GH_PAT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy Profile
+    name: Deploy Payment
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -89,5 +92,5 @@ jobs:
             cd /opt/casego/backend
             git pull
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull app
-            docker compose up -d --no-deps app
+            docker compose pull payment-service
+            docker compose up -d --no-deps payment-service

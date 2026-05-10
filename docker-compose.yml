@@ -1,4 +1,18 @@
 services:
+  certs-gen:
+      image: alpine:latest
+      container_name: certs_generator
+      volumes:
+        - ./certs:/scripts 
+        - certs_data:/out  
+      command: >
+        sh -c "apk add --no-cache openssl && 
+               cd /scripts && 
+               chmod +x gen.sh && 
+               ./gen.sh && 
+               cp *.pem /out/ 2>/dev/null || cp *.crt /out/ 2>/dev/null || cp *.key /out/ 2>/dev/null"
+      networks:
+        - app-network
   # ── Profile ──────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
@@ -177,7 +191,11 @@ services:
       REDIS_PORT: 6379
     ports:
       - "8081:8081"
+    volumes:
+      - certs_data:/app/certs:ro
     depends_on:
+      certs-gen:
+        condition: service_completed_successfully
       casego-postgres:
         condition: service_healthy
       casego-migrate:
@@ -234,7 +252,11 @@ services:
     ports:
       - "8082:8082"
       - "50051:50051"
+    volumes:
+      - certs_data:/app/certs:ro
     depends_on:
+      certs-gen:
+        condition: service_completed_successfully
       caseprofile-postgres:
         condition: service_healthy
       caseprofile-migrate:
@@ -247,6 +269,7 @@ volumes:
   casego_postgres_data:
   casego_redis_data:
   caseprofile_postgres_data:
+  certs_data:
 
 networks:
   app-network:
