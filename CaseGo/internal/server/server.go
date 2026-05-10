@@ -7,6 +7,8 @@ import (
 	"github.com/sewaustav/CaseGoCore/config"
 	"github.com/sewaustav/CaseGoCore/internal/api"
 	"github.com/sewaustav/CaseGoCore/internal/cache"
+	"github.com/sewaustav/CaseGoCore/internal/cache/history_repo"
+	"github.com/sewaustav/CaseGoCore/internal/cache/subscription_repo"
 	"github.com/sewaustav/CaseGoCore/internal/cases/handlers/grpc"
 	http_handlers "github.com/sewaustav/CaseGoCore/internal/cases/handlers/http"
 	"github.com/sewaustav/CaseGoCore/internal/cases/repository"
@@ -20,7 +22,7 @@ import (
 type Server struct {
 	DB    *db.DataBase
 	HTTP  *http.Server
-	Redis cache.Interactor
+	Redis *cache.Redis
 }
 
 func New() (*Server, error) {
@@ -46,6 +48,9 @@ func New() (*Server, error) {
 		return nil, err
 	}
 
+	historyRedisRepo := history_repo.New(redisClient.Client)
+	subRedisRepo := subscription_repo.New(redisClient.Client)
+
 	var llmService llm_service.LLM
 	if conf.LLMProvider == "gigachat" {
 		llmService = llm_service.NewGigaChatService(conf.GigaChatAuthKey)
@@ -60,7 +65,12 @@ func New() (*Server, error) {
 		return nil, err
 	}
 
-	caseGoService := service.NewCaseGoCoreService(redisClient, caseGoRepo, dialogRepo, interactionsRepo, llmService, grpsClient)
+	paymentGrpsClient, err := grpc.NewPaymentCheckGRPCHandler(conf.PAYMENTGRPCSERVER)
+	if err != nil {
+		return nil, err
+	}
+
+	caseGoService := service.NewCaseGoCoreService(historyRedisRepo, subRedisRepo, caseGoRepo, dialogRepo, interactionsRepo, llmService, grpsClient, paymentGrpsClient)
 
 	jwtMiddleware := rs256.New(conf.PublicKey, "auth", "all")
 

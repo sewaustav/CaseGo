@@ -154,6 +154,36 @@ func (_m *CaseGoService) GetCasesService(ctx context.Context, limit int, page in
 	return r0, r1
 }
 
+// GetStatsService provides a mock function with given fields: ctx
+func (_m *CaseGoService) GetStatsService(ctx context.Context) (*dto.StatsResponse, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStatsService")
+	}
+
+	var r0 *dto.StatsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*dto.StatsResponse, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *dto.StatsResponse); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dto.StatsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetUserDialogByIDService provides a mock function with given fields: ctx, user, dialogID
 func (_m *CaseGoService) GetUserDialogByIDService(ctx context.Context, user models.UserIdentity, dialogID int64) (*models.Conversation, error) {
 	ret := _m.Called(ctx, user, dialogID)
@@ -297,36 +327,6 @@ func (_m *CaseGoService) StartDialogService(ctx context.Context, caseID int64, u
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, models.UserIdentity) error); ok {
 		r1 = rf(ctx, caseID, user)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetStatsService provides a mock function with given fields: ctx
-func (_m *CaseGoService) GetStatsService(ctx context.Context) (*dto.StatsResponse, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetStatsService")
-	}
-
-	var r0 *dto.StatsResponse
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*dto.StatsResponse, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) *dto.StatsResponse); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*dto.StatsResponse)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}

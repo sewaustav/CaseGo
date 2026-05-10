@@ -27,7 +27,8 @@ type Config struct {
 	LLMProvider     string // "deepseek" | "gigachat"
 	GigaChatAuthKey string
 
-	GRPCSEVER string
+	GRPCSEVER         string
+	PAYMENTGRPCSERVER string
 
 	PrivateKey *rsa.PrivateKey
 	PublicKey  *rsa.PublicKey
@@ -68,20 +69,21 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		DBHost:        os.Getenv("POSTGRES_HOST"),
-		DBName:        os.Getenv("POSTGRES_DB"),
-		DBUser:        os.Getenv("POSTGRES_USER"),
-		DBPassword:    os.Getenv("POSTGRES_PASSWORD"),
-		DBPort:        dbPort,
-		PublicKey:     publicKey,
-		PrivateKey:    privateKey,
-		RedisHost:     os.Getenv("REDIS_HOST"),
-		RedisPort:     redisPort,
-		RedisPassword: os.Getenv("REDIS_PASSWORD"),
-		LLMURL:          os.Getenv("LLM_URL"),
-		LLMProvider:     os.Getenv("LLM_PROVIDER"),
-		GigaChatAuthKey: os.Getenv("GIGACHAT_AUTH_KEY"),
-		GRPCSEVER:       os.Getenv("GRPC_SEVER"),
+		DBHost:            os.Getenv("POSTGRES_HOST"),
+		DBName:            os.Getenv("POSTGRES_DB"),
+		DBUser:            os.Getenv("POSTGRES_USER"),
+		DBPassword:        os.Getenv("POSTGRES_PASSWORD"),
+		DBPort:            dbPort,
+		PublicKey:         publicKey,
+		PrivateKey:        privateKey,
+		RedisHost:         os.Getenv("REDIS_HOST"),
+		RedisPort:         redisPort,
+		RedisPassword:     os.Getenv("REDIS_PASSWORD"),
+		LLMURL:            os.Getenv("LLM_URL"),
+		LLMProvider:       os.Getenv("LLM_PROVIDER"),
+		GigaChatAuthKey:   os.Getenv("GIGACHAT_AUTH_KEY"),
+		GRPCSEVER:         os.Getenv("GRPC_SEVER"),
+		PAYMENTGRPCSERVER: os.Getenv("PAYMENT_GRPC_SERVER"),
 	}
 }
 
