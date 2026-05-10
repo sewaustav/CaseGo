@@ -175,6 +175,11 @@ services:
       POSTGRES_PORT: 5432
       REDIS_HOST: casego-redis
       REDIS_PORT: 6379
+      PAYMENT_GRPC_SERVER: payment-service:50052
+    volumes:
+      - ./certs/ca.crt:/app/ca.crt:ro
+      - ./certs/general-client.crt:/app/general-client.crt:ro
+      - ./certs/general-client.key:/app/general-client.key:ro
     ports:
       - "8081:8081"
     depends_on:
@@ -183,6 +188,8 @@ services:
       casego-migrate:
         condition: service_completed_successfully
       casego-redis:
+        condition: service_healthy
+      payment-service:
         condition: service_healthy
     networks:
       - app-network
@@ -241,12 +248,75 @@ services:
         condition: service_completed_successfully
     networks:
       - app-network
+# ── Payment ──────────────────────────────────────────────
+  payment-postgres:
+    image: postgres:15-alpine
+    container_name: payment_postgres
+    restart: unless-stopped
+    env_file:
+      - Payment/.env
+    ports:
+      - "5436:5432"
+    volumes:
+      - payment_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-network
+
+  payment-migrate:
+    image: migrate/migrate
+    container_name: payment_migrate
+    volumes:
+      - ./Payment/migrations:/migrations
+    command: -path=/migrations/ -database "postgres://payment_user:payment_password@payment-postgres:5432/payment_db?sslmode=disable" up
+    depends_on:
+      payment-postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  payment-service:
+    image: ghcr.io/sewaustav/casego-payment:latest
+    build:
+      context: ./Payment
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+    container_name: payment_service
+    env_file:
+      - Payment/.env
+    environment:
+      POSTGRES_HOST: payment-postgres
+      POSTGRES_PORT: 5432
+    volumes:
+      - ./certs:/app/certs:ro
+    ports:
+      - "8085:8085"
+      - "50052:50052"
+    depends_on:
+      payment-postgres:
+        condition: service_healthy
+      payment-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8085/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
 
 volumes:
   auth_postgres_data:
   casego_postgres_data:
   casego_redis_data:
   caseprofile_postgres_data:
+  payment_postgres_data:
 
 networks:
   app-network:
