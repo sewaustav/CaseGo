@@ -2,12 +2,12 @@ name: CI - Auth (Python)
 
 on:
   push:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'Auth/**'
       - '.github/workflows/ci-auth.yml'
   pull_request:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'Auth/**'
       - '.github/workflows/ci-auth.yml'

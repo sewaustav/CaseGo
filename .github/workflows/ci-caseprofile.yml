@@ -2,12 +2,12 @@ name: CI - CaseProfile (Go)
 
 on:
   push:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'CaseProfile/**'
       - '.github/workflows/ci-caseprofile.yml'
   pull_request:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'CaseProfile/**'
       - '.github/workflows/ci-caseprofile.yml'

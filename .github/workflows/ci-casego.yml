@@ -2,12 +2,12 @@ name: CI - CaseGo (Go)
 
 on:
   push:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'CaseGo/**'
       - '.github/workflows/ci-casego.yml'
   pull_request:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'CaseGo/**'
       - '.github/workflows/ci-casego.yml'
