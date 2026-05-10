@@ -14,7 +14,7 @@ import (
 type Service interface {
 	HandleResultsService(ctx context.Context, result dto.Result, user models.UserIdentity) error
 	GetProfileService(ctx context.Context, user models.UserIdentity) (*models.CaseProfile, error)
-	GetHistoryService(ctx context.Context, user models.UserIdentity, from time.Time) ([]*models.CaseProfileHistory, error)
+	GetHistoryService(ctx context.Context, user models.UserIdentity, from time.Time) ([]*models.CaseResult, error)
 
 	// admin only
 	GetProfileByUserIDService(ctx context.Context, userID int64, user models.UserIdentity) (*models.CaseProfile, error)
@@ -99,12 +99,12 @@ func (s CaseResultService) GetProfileService(ctx context.Context, user models.Us
 	return profile, nil
 }
 
-func (s CaseResultService) GetHistoryService(ctx context.Context, user models.UserIdentity, from time.Time) ([]*models.CaseProfileHistory, error) {
-	history, err := s.repo.GetHistoryBy(ctx, user.UserID, from)
+func (s CaseResultService) GetHistoryService(ctx context.Context, user models.UserIdentity, from time.Time) ([]*models.CaseResult, error) {
+	results, err := s.repo.GetResultsByUserID(ctx, user.UserID)
 	if err != nil {
 		return nil, apperrors.NewInternal("failed to get history", err)
 	}
-	return history, nil
+	return results, nil
 }
 
 func (s CaseResultService) GetProfileByUserIDService(ctx context.Context, userID int64, user models.UserIdentity) (*models.CaseProfile, error) {

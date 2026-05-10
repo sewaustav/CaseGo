@@ -58,11 +58,11 @@ func TestGetHistoryService_Success(t *testing.T) {
 	ctx := context.Background()
 	user := models.UserIdentity{UserID: 1, Role: models.User}
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	expected := []*models.CaseProfileHistory{
+	expected := []*models.CaseResult{
 		{ID: 1, UserID: 1, Assertiveness: 0.5},
 	}
 
-	repo.On("GetHistoryBy", ctx, int64(1), from).Return(expected, nil)
+	repo.On("GetResultsByUserID", ctx, int64(1)).Return(expected, nil)
 
 	result, err := svc.GetHistoryService(ctx, user, from)
 

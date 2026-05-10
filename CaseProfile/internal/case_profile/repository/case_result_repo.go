@@ -20,6 +20,7 @@ type CaseResultRepo interface {
 	GetProfileByUserID(ctx context.Context, userID int64) (*models.CaseProfile, error)
 	GetProfileByID(ctx context.Context, id int64) (*models.CaseProfile, error)
 	GetHistoryBy(ctx context.Context, userID int64, from time.Time) ([]*models.CaseProfileHistory, error)
+	GetResultsByUserID(ctx context.Context, userID int64) ([]*models.CaseResult, error)
 	DeleteResultByID(ctx context.Context, id int64) error
 }
 
@@ -55,8 +56,8 @@ func (p *PostgresCaseResultRepo) UpdateProfile(ctx context.Context, result *mode
 func (p *PostgresCaseResultRepo) StoreProfile(ctx context.Context, result *models.CaseProfile) error {
 	query, args, err := psql.
 		Insert("case_profile_histories").
-		Columns("user_id", "total_cases", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
-		Values(result.UserID, result.TotalCases, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
+		Columns("user_id", "assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "actual_date").
+		Values(result.UserID, result.Assertiveness, result.Empathy, result.ClarityCommunication, result.Resistance, result.Eloquence, result.Initiative, result.ChangedAt).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("store profile history: build query: %w", err)
@@ -201,6 +202,39 @@ func (p *PostgresCaseResultRepo) GetHistoryBy(ctx context.Context, userID int64,
 	}
 
 	return result, nil
+}
+
+func (p *PostgresCaseResultRepo) GetResultsByUserID(ctx context.Context, userID int64) ([]*models.CaseResult, error) {
+	query, args, err := psql.
+		Select("id", "user_id", "case_id", "dialog_id", "steps_count", "tokens_used",
+			"assertiveness", "empathy", "clarity_communication", "resistance", "eloquence", "initiative", "case_date").
+		From("case_profile_results").
+		Where(sq.Eq{"user_id": userID}).
+		OrderBy("case_date DESC").
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("get results by user id: build query: %w", err)
+	}
+
+	rows, err := p.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("get results by user id: query: %w", err)
+	}
+	defer rows.Close()
+
+	var results []*models.CaseResult
+	for rows.Next() {
+		r := &models.CaseResult{}
+		if err := rows.Scan(
+			&r.ID, &r.UserID, &r.CaseID, &r.DialogID, &r.StepsCount, &r.TokensUsed,
+			&r.Assertiveness, &r.Empathy, &r.ClarityCommunication,
+			&r.Resistance, &r.Eloquence, &r.Initiative, &r.FinishedAt,
+		); err != nil {
+			return nil, fmt.Errorf("get results by user id: scan: %w", err)
+		}
+		results = append(results, r)
+	}
+	return results, rows.Err()
 }
 
 func (p *PostgresCaseResultRepo) DeleteResultByID(ctx context.Context, id int64) error {
