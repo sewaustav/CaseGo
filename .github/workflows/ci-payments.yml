@@ -70,7 +70,9 @@ jobs:
         with:
           context: ./Payment
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/casego-payment:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/casego-payment:latest
+            ghcr.io/${{ github.repository_owner }}/casego-payment:main-${{ github.sha }}
           build-args: GITHUB_TOKEN=${{ secrets.GH_PAT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

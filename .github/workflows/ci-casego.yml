@@ -70,7 +70,9 @@ jobs:
         with:
           context: ./CaseGo
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/casego-casego:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/casego-casego:latest
+            ghcr.io/${{ github.repository_owner }}/casego-casego:main-${{ github.sha }}
           build-args: GITHUB_TOKEN=${{ secrets.GH_PAT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
