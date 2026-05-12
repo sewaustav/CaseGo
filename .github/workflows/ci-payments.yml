@@ -5,12 +5,12 @@ on:
     branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'Payment/**'
-      - '.github/workflows/ci-payment.yml'
+      - '.github/workflows/ci-payments.yml'
   pull_request:
     branches: [main, develop, 'feature/**', 'feat/**']
     paths:
       - 'Payment/**'
-      - '.github/workflows/ci-payment.yml'
+      - '.github/workflows/ci-payments.yml'
 
 jobs:
   test:
