@@ -206,7 +206,7 @@ services:
       casego-redis:
         condition: service_healthy
       payment-service:
-        condition: service_healthy
+        condition: service_started
     networks:
       - app-network
 
@@ -322,12 +322,6 @@ services:
         condition: service_healthy
       payment-migrate:
         condition: service_completed_successfully
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8085/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     networks:
       - app-network
 
