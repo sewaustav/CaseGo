@@ -1,6 +1,8 @@
 package profiledto
 
 import (
+	"time"
+
 	_ "github.com/go-playground/validator/v10"
 )
 
@@ -49,3 +51,7 @@ type ProfessionDTO struct {
 	ProfessionID int16 `json:"profession_id" validate:"required"`
 }
 
+type LevelDto struct {
+	Xp   int       `json:"xp" validate:"required,gte=0"`
+	Date time.Time `json:"date" validate:"required"`
+}
