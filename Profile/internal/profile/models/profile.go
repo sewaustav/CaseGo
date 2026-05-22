@@ -67,3 +67,12 @@ type UserProfile struct {
 	UsrPurposes []UserPurpose
 	UsrSocials  []UserSocialLink
 }
+
+type UserLevel struct {
+	ID         int64     `json:"id" db:"id"`
+	UserID     int64     `json:"user_id" db:"user_id"`
+	Xp         int       `json:"xp" db:"xp"`
+	Level      int       `json:"level" db:"level"`
+	Streak     int       `json:"streak" db:"streak"`
+	LastActive time.Time `json:"last_active" db:"last_active"`
+}

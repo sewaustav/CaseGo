@@ -8,7 +8,7 @@ import (
 	categoriesHandler "github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/handlers"
 	"github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/repo"
 	categoryService "github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/service"
-	profileHandler "github.com/YoungFlores/Case_Go/Profile/internal/profile/handlers"
+	profileHandler "github.com/YoungFlores/Case_Go/Profile/internal/profile/handlers/http"
 	profileRepo "github.com/YoungFlores/Case_Go/Profile/internal/profile/repository/profile_repo"
 	profileService "github.com/YoungFlores/Case_Go/Profile/internal/profile/service"
 	"github.com/YoungFlores/Case_Go/Profile/internal/search/handlers"
@@ -40,8 +40,9 @@ func New() (*Sever, error) {
 	pr := profileRepo.NewPostgresProfileRepo(database.GetDB())
 	cr := repo.NewPostgresCategoryRepo(database.GetDB())
 	sr := searchRepo.NewPostgresSearchRepo(database.GetDB())
+	lr := profileRepo.NewPostgresLevelRepo(database.GetDB())
 
-	ps := profileService.NewProfileService(pr, cr)
+	ps := profileService.NewProfileService(pr, cr, lr)
 	cs := categoryService.NewProfessionCategoryService(cr)
 	ss := service.NewSearchService(sr)
 
