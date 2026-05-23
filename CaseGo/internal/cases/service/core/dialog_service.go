@@ -22,7 +22,7 @@ func (s *CaseGoCoreService) StartDialogService(ctx context.Context, caseID int64
 	if !ok {
 		return nil, err
 	}
-	
+
 	caseModel, err := s.caseGoRepo.GetCaseByID(ctx, caseID)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {
@@ -110,13 +110,18 @@ func (s *CaseGoCoreService) HandleInteractionService(ctx context.Context, intera
 	}, nil
 }
 
-func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.Result, error) {
+func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.ResultResponse, error) {
 	dialog, err := s.dialogRepo.GetDialogByID(ctx, dialogID)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {
 			return nil, apperrors.NewNotFound("dialog not found", err)
 		}
 		return nil, apperrors.NewInternal("failed to get dialog", err)
+	}
+
+	activeCase, err := s.caseGoRepo.GetCaseByID(ctx, dialog.CaseID)
+	if err != nil {
+		return nil, apperrors.NewInternal("failed to get case", err)
 	}
 
 	if dialog.UserID != user.UserID {
@@ -136,17 +141,9 @@ func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID 
 		return nil, apperrors.NewInternal("failed to get dialog history from cache", err)
 	}
 
-	analysis := make(chan *dto.Result, 1)
-	errChan := make(chan error, 1)
-
-	go func() {
-		result, err := s.llmService.AnalyzeCase(ctx, dialogHistory)
-		if err != nil {
-			errChan <- err
-			return
-		}
-		analysis <- result
-	}()
+	analysisChan := make(chan *dto.Result, 1)
+	levelChan := make(chan *dto.UserLevelInfo, 1)
+	errChan := make(chan error, 2)
 
 	for _, interaction := range dialogHistory {
 		if err := txRepo.PutInteraction(ctx, &interaction); err != nil {
@@ -162,37 +159,83 @@ func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID 
 		return nil, apperrors.NewInternal("failed to clear dialog cache", err)
 	}
 
-	select {
-	case result := <-analysis:
-		go func(r *dto.Result) {
-			grpcResult := &models.Result{
-				UserID:               user.UserID,
-				CaseID:               dialog.CaseID,
-				DialogID:             dialogID,
-				StepsCount:           r.StepsCount,
-				TokensUsed:           r.TokensUsed,
-				FinishedAt:           time.Now(),
-				Assertiveness:        r.SkillsRating.Assertiveness,
-				Empathy:              r.SkillsRating.Empathy,
-				ClarityCommunication: r.SkillsRating.ClarityCommunication,
-				Resistance:           r.SkillsRating.Resistance,
-				Eloquence:            r.SkillsRating.Eloquence,
-				Initiative:           r.SkillsRating.Initiative,
-			}
+	go func() {
+		result, err := s.llmService.AnalyzeCase(ctx, dialogHistory)
+		if err != nil {
+			errChan <- fmt.Errorf("LLM analysis failed: %w", err)
+			return
+		}
+		analysisChan <- result
+	}()
 
-			if err := s.grpcHandler.SendResults(context.Background(), *grpcResult); err != nil {
-				log.Printf("failed to send grpc results: %v", err)
-			}
-		}(result)
+	go func() {
+		level, err := s.levelResult.LevelDoneGrpcHandler(ctx, user, &dto.LevelXpResult{
+			Xp:   *activeCase.Xp,
+			Date: time.Now(),
+		})
+		if err != nil {
+			errChan <- fmt.Errorf("gRPC level reward failed: %w", err)
+			return
+		}
+		levelChan <- level
+	}()
 
-		return result, nil
+	var finalResult *dto.Result
+	var finalLevel *dto.UserLevelInfo
 
-	case err := <-errChan:
-		return nil, apperrors.NewInternal("LLM analysis failed", fmt.Errorf("analyze case: %w", err))
-
-	case <-ctx.Done():
-		return nil, apperrors.NewInternal("request timeout", ctx.Err())
+	for i := 0; i < 2; i++ {
+		select {
+		case res := <-analysisChan:
+			finalResult = res
+		case lvl := <-levelChan:
+			finalLevel = lvl
+		case err := <-errChan:
+			// Если хоть одна горутина упала — возвращаем ошибку
+			return nil, apperrors.NewInternal("failed to complete dialog tasks", err)
+		case <-ctx.Done():
+			return nil, apperrors.NewInternal("request timeout", ctx.Err())
+		}
 	}
+
+	go func(r *dto.Result) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				log.Printf("PANIC recovered in SendResults: %v", rec)
+			}
+		}()
+
+		asyncCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		grpcResult := &models.Result{
+			UserID:               user.UserID,
+			CaseID:               dialog.CaseID,
+			DialogID:             dialogID,
+			StepsCount:           r.StepsCount,
+			TokensUsed:           r.TokensUsed,
+			FinishedAt:           time.Now(),
+			Assertiveness:        r.SkillsRating.Assertiveness,
+			Empathy:              r.SkillsRating.Empathy,
+			ClarityCommunication: r.SkillsRating.ClarityCommunication,
+			Resistance:           r.SkillsRating.Resistance,
+			Eloquence:            r.SkillsRating.Eloquence,
+			Initiative:           r.SkillsRating.Initiative,
+		}
+
+		if err := s.grpcHandler.SendResults(asyncCtx, *grpcResult); err != nil {
+			log.Printf("failed to send grpc results: %v", err)
+		}
+	}(finalResult)
+
+	return &dto.ResultResponse{
+		Result: finalResult,
+		Level: &dto.CaseLevelResult{
+			Level:    finalLevel.Level,
+			Xp:       finalLevel.Xp,
+			XpEarned: *activeCase.Xp,
+			LevelUp:  finalLevel.IsLevelUp,
+		},
+	}, nil
 }
 
 func (s *CaseGoCoreService) GetUsersDialogsService(ctx context.Context, user models.UserIdentity, userID int64, limit, offset int) ([]models.Conversation, error) {

@@ -136,6 +136,24 @@ func (_m *ProfileCore) CreateProfileService(ctx context.Context, req profiledto.
 	return r0, r1
 }
 
+// DeleteLevelService provides a mock function with given fields: ctx, usr
+func (_m *ProfileCore) DeleteLevelService(ctx context.Context, usr models.UserIdentity) error {
+	ret := _m.Called(ctx, usr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteLevelService")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity) error); ok {
+		r0 = rf(ctx, usr)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteLinkService provides a mock function with given fields: ctx, id, usr
 func (_m *ProfileCore) DeleteLinkService(ctx context.Context, id int64, usr models.UserIdentity) error {
 	ret := _m.Called(ctx, id, usr)
@@ -286,6 +304,36 @@ func (_m *ProfileCore) GetAllUsersService(ctx context.Context, usr models.UserId
 	return r0, r1
 }
 
+// GetLevelService provides a mock function with given fields: ctx, usr
+func (_m *ProfileCore) GetLevelService(ctx context.Context, usr models.UserIdentity) (*models.UserLevel, error) {
+	ret := _m.Called(ctx, usr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLevelService")
+	}
+
+	var r0 *models.UserLevel
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity) (*models.UserLevel, error)); ok {
+		return rf(ctx, usr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity) *models.UserLevel); ok {
+		r0 = rf(ctx, usr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.UserLevel)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, models.UserIdentity) error); ok {
+		r1 = rf(ctx, usr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetProfessionsService provides a mock function with given fields: ctx, usr
 func (_m *ProfileCore) GetProfessionsService(ctx context.Context, usr models.UserIdentity) ([]models.UserProfession, error) {
 	ret := _m.Called(ctx, usr)
@@ -399,6 +447,36 @@ func (_m *ProfileCore) PatchProfileService(ctx context.Context, usr models.UserI
 
 	if rf, ok := ret.Get(1).(func(context.Context, models.UserIdentity, profiledto.UpdateProfilePartialDTO) error); ok {
 		r1 = rf(ctx, usr, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateLevelService provides a mock function with given fields: ctx, usr, level
+func (_m *ProfileCore) UpdateLevelService(ctx context.Context, usr models.UserIdentity, level *profiledto.LevelDto) (*models.UserLevel, error) {
+	ret := _m.Called(ctx, usr, level)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateLevelService")
+	}
+
+	var r0 *models.UserLevel
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity, *profiledto.LevelDto) (*models.UserLevel, error)); ok {
+		return rf(ctx, usr, level)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, models.UserIdentity, *profiledto.LevelDto) *models.UserLevel); ok {
+		r0 = rf(ctx, usr, level)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.UserLevel)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, models.UserIdentity, *profiledto.LevelDto) error); ok {
+		r1 = rf(ctx, usr, level)
 	} else {
 		r1 = ret.Error(1)
 	}

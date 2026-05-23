@@ -70,7 +70,12 @@ func New() (*Server, error) {
 		return nil, err
 	}
 
-	caseGoService := service.NewCaseGoCoreService(historyRedisRepo, subRedisRepo, caseGoRepo, dialogRepo, interactionsRepo, llmService, grpsClient, paymentGrpsClient)
+	grpcLevel, err := grpc.NewLevelGrpcHandler(conf.LEVELGRPCSERVER)
+	if err != nil {
+		return nil, err
+	}
+
+	caseGoService := service.NewCaseGoCoreService(historyRedisRepo, subRedisRepo, caseGoRepo, dialogRepo, interactionsRepo, llmService, grpsClient, paymentGrpsClient, grpcLevel)
 
 	jwtMiddleware := rs256.New(conf.PublicKey, "auth", "all")
 

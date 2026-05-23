@@ -61,6 +61,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	slog.Info("Stopping gRPC server...")
+	srv.GRPC.GracefulStop()
+
 	if err := srv.DB.GetDB().Close(); err != nil {
 		slog.Error("Failed to close DB", "error", err)
 	}

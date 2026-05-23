@@ -3,7 +3,7 @@ package api
 import (
 	_ "github.com/YoungFlores/Case_Go/Profile/docs"
 	categoriesHandler "github.com/YoungFlores/Case_Go/Profile/internal/profession_categories/handlers"
-	profileHandler "github.com/YoungFlores/Case_Go/Profile/internal/profile/handlers"
+	profileHandler "github.com/YoungFlores/Case_Go/Profile/internal/profile/handlers/http"
 	"github.com/YoungFlores/Case_Go/Profile/internal/search/handlers"
 	"github.com/YoungFlores/Case_Go/Profile/pkg/middleware/rs256"
 	"github.com/gin-contrib/cors"

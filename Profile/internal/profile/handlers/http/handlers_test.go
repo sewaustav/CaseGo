@@ -1,4 +1,4 @@
-package profile_handler_test
+package http_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	dto "github.com/YoungFlores/Case_Go/Profile/internal/profile/dto"
-	profile_handler "github.com/YoungFlores/Case_Go/Profile/internal/profile/handlers"
+	profile_handler "github.com/YoungFlores/Case_Go/Profile/internal/profile/handlers/http"
 	"github.com/YoungFlores/Case_Go/Profile/internal/profile/models"
 	repoerr "github.com/YoungFlores/Case_Go/Profile/internal/profile/repository/errors"
 	"github.com/YoungFlores/Case_Go/Profile/mocks"

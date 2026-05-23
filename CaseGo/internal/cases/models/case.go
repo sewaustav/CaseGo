@@ -24,6 +24,7 @@ type Case struct {
 	FirstQuestion string    `json:"first_question" db:"first_question"`
 	Creator       int64     `json:"creator" db:"creator"`
 	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	Xp            *int32    `json:"xp" db:"xp"`
 }
 
 type Dialog struct {
