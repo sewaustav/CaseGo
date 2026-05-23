@@ -19,13 +19,13 @@ services:
     container_name: postgres-db
     hostname: postgres
     environment:
-      POSTGRES_DB: app_db
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: ${PROFILE_DB_NAME}
+      POSTGRES_USER: ${PROFILE_DB_USER}
+      POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD}
     ports:
       - "5435:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev_user -d app_db"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -37,7 +37,7 @@ services:
     container_name: migrate-service
     volumes:
       - ./Profile/migrations:/migrations
-    command: -path=/migrations/ -database "postgres://dev_user:dev_password@postgres:5432/app_db?sslmode=disable" up
+    command: -path=/migrations/ -database "postgres://${PROFILE_DB_USER}:${PROFILE_DB_PASSWORD}@postgres:5432/${PROFILE_DB_NAME}?sslmode=disable" up
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,6 +46,7 @@ services:
 
   app:
     image: ghcr.io/sewaustav/casego-profile:latest
+    platform: linux/amd64
     build:
       context: ./Profile
       args:
@@ -68,6 +69,7 @@ services:
   # ── Auth ─────────────────────────────────────────────────
   auth-fastapi:
     image: ghcr.io/sewaustav/casego-auth:latest
+    platform: linux/amd64
     build:
       context: ./Auth
     container_name: auth_fastapi
@@ -111,6 +113,7 @@ services:
 
   auth-migrate:
     image: ghcr.io/sewaustav/casego-auth:latest
+    platform: linux/amd64
     build:
       context: ./Auth
     container_name: auth_migrate
@@ -148,7 +151,7 @@ services:
     container_name: casego_migrate
     volumes:
       - ./CaseGo/migrations:/migrations
-    command: -path=/migrations/ -database "postgres://casego_user:casego_password@casego-postgres:5432/casego_db?sslmode=disable" up
+    command: -path=/migrations/ -database "postgres://${CASEGO_DB_USER}:${CASEGO_DB_PASSWORD}@casego-postgres:5432/${CASEGO_DB_NAME}?sslmode=disable" up
     depends_on:
       casego-postgres:
         condition: service_healthy
@@ -177,6 +180,7 @@ services:
 
   case-go:
     image: ghcr.io/sewaustav/casego-casego:latest
+    platform: linux/amd64
     build:
       context: ./CaseGo
       args:
@@ -206,7 +210,7 @@ services:
       casego-redis:
         condition: service_healthy
       payment-service:
-        condition: service_healthy
+        condition: service_started
     networks:
       - app-network
 
@@ -235,7 +239,7 @@ services:
     container_name: caseprofile_migrate
     volumes:
       - ./CaseProfile/migrations:/migrations
-    command: -path=/migrations/ -database "postgres://caseprofile_user:caseprofile_password@caseprofile-postgres:5432/caseprofile_db?sslmode=disable" up
+    command: -path=/migrations/ -database "postgres://${CASEPROFILE_DB_USER}:${CASEPROFILE_DB_PASSWORD}@caseprofile-postgres:5432/${CASEPROFILE_DB_NAME}?sslmode=disable" up
     depends_on:
       caseprofile-postgres:
         condition: service_healthy
@@ -244,6 +248,7 @@ services:
 
   case-profile:
     image: ghcr.io/sewaustav/casego-caseprofile:latest
+    platform: linux/amd64
     build:
       context: ./CaseProfile
       args:
@@ -293,7 +298,7 @@ services:
     container_name: payment_migrate
     volumes:
       - ./Payment/migrations:/migrations
-    command: -path=/migrations/ -database "postgres://payment_user:payment_password@payment-postgres:5432/payment_db?sslmode=disable" up
+    command: -path=/migrations/ -database "postgres://${PAYMENT_DB_USER}:${PAYMENT_DB_PASSWORD}@payment-postgres:5432/${PAYMENT_DB_NAME}?sslmode=disable" up
     depends_on:
       payment-postgres:
         condition: service_healthy
@@ -302,6 +307,7 @@ services:
 
   payment-service:
     image: ghcr.io/sewaustav/casego-payment:latest
+    platform: linux/amd64
     build:
       context: ./Payment
       args:
@@ -322,12 +328,6 @@ services:
         condition: service_healthy
       payment-migrate:
         condition: service_completed_successfully
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8085/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     networks:
       - app-network
 

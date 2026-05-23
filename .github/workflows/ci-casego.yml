@@ -70,7 +70,9 @@ jobs:
         with:
           context: ./CaseGo
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/casego-casego:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/casego-casego:latest
+            ghcr.io/${{ github.repository_owner }}/casego-casego:main-${{ github.sha }}
           build-args: GITHUB_TOKEN=${{ secrets.GH_PAT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -86,10 +88,10 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: root
+          username: maks
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/casego/backend
+            cd ~/casego/backend
             git pull
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull case-go
