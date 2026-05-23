@@ -31,6 +31,12 @@ jobs:
           go-version-file: Profile/go.mod
           cache-dependency-path: Profile/go.sum
 
+      - name: Configure git for private modules
+        run: git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Download dependencies
+        run: go mod download
+
       - name: Vet
         run: go vet ./...
 
@@ -70,7 +76,9 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/casego-profile:latest
             ghcr.io/${{ github.repository_owner }}/casego-profile:main-${{ github.sha }}
-          build-args: SERVICE_NAME=caseGo
+          build-args: |
+            SERVICE_NAME=caseGo
+            GITHUB_TOKEN=${{ secrets.GH_PAT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
