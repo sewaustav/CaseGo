@@ -6,6 +6,6 @@ CREATE TABLE levels
     streak  INT    NOT NULL DEFAULT 0,
     level   INT    NOT NULL DEFAULT 1,
     last_active TIMESTAMP WITH TIME ZONE
-)
+);
 
 CREATE INDEX idx_levels_user_id ON levels (user_id);
