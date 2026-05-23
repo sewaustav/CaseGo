@@ -29,6 +29,7 @@ type Config struct {
 
 	GRPCSEVER         string
 	PAYMENTGRPCSERVER string
+	LEVELGRPCSERVER   string
 
 	PrivateKey *rsa.PrivateKey
 	PublicKey  *rsa.PublicKey
@@ -84,6 +85,7 @@ func LoadConfig() *Config {
 		GigaChatAuthKey:   os.Getenv("GIGACHAT_AUTH_KEY"),
 		GRPCSEVER:         os.Getenv("GRPC_SEVER"),
 		PAYMENTGRPCSERVER: os.Getenv("PAYMENT_GRPC_SERVER"),
+		LEVELGRPCSERVER:   os.Getenv("LEVEL_GRPC_SERVER"),
 	}
 }
 

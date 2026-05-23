@@ -25,6 +25,7 @@ type NewCaseDto struct {
 	Category      *int32  `json:"category" validate:"excluded_with=Prompt"`
 	Description   *string `json:"description" validate:"excluded_with=Prompt"`
 	FirstQuestion *string `json:"first_question" validate:"excluded_with=Prompt"`
+	Xp            *int32  `json:"xp"`
 
 	Prompt *string `json:"prompt" validate:"required_without_all=Topic Category Description FirstQuestion"`
 }
@@ -73,7 +74,32 @@ type Result struct {
 	FinishedAt   time.Time `json:"finished_at"`
 }
 
+type ResultResponse struct {
+	Result *Result          `json:"result"`
+	Level  *CaseLevelResult `json:"level"`
+}
+
 type SubscriptionStatusDto struct {
-	Status    int32       `db:"subscription" json:"subscription"`
+	Status    int32     `db:"subscription" json:"subscription"`
 	ExpiredAt time.Time `db:"expired_at" json:"expired_at"`
+}
+
+type LevelXpResult struct {
+	Xp   int32     `json:"xp"`
+	Date time.Time `json:"date"`
+}
+
+type UserLevelInfo struct {
+	Level          int32     `json:"level"`
+	Xp             int32     `json:"xp"`
+	Streak         int32     `json:"streak"`
+	LastActiveDate time.Time `json:"last_active_date"`
+	IsLevelUp      bool      `json:"is_level_up"`
+}
+
+type CaseLevelResult struct {
+	Level    int32 `json:"level"`
+	Xp       int32 `json:"xp"`
+	XpEarned int32 `json:"xp_earned"`
+	LevelUp  bool  `json:"level_up"`
 }

@@ -50,11 +50,12 @@ func newSvc(t *testing.T) (
 	grpcHandler := mocks.NewGRPCService(t)
 	paymentCheck := mocks.NewPaymentGrpcClient(t)
 	llm := mocks.NewLLM(t)
+	grpcLevel := mocks.NewLevelGrpcClient(t)
 
 	svc := NewCaseGoCoreService(
 		redisClient, subRedis,
 		caseRepo, dialogRepo, interactionRepo,
-		llm, grpcHandler, paymentCheck,
+		llm, grpcHandler, paymentCheck, grpcLevel,
 	)
 	return svc, caseRepo, dialogRepo, interactionRepo, redisClient, subRedis, grpcHandler, paymentCheck, llm
 }
@@ -279,32 +280,39 @@ func TestHandleInteractionService_NilInteraction(t *testing.T) {
 
 func TestCompleteDialogService(t *testing.T) {
 	ctx := context.Background()
-	svc, _, dialogRepo, interactionRepo, redisClient, _, _, _, llm := newSvc(t)
 
-	// Подменяем grpc на noop прямо через конструктор — пересобираем сервис с noopGRPC.
-	_, caseRepo2, dialogRepo2, interactionRepo2, redisClient2, subRedis2, _, paymentCheck2, llm2 := newSvc(t)
-	_ = caseRepo2
-	svc2 := NewCaseGoCoreService(
-		redisClient2, subRedis2,
-		caseRepo2, dialogRepo2, interactionRepo2,
-		llm2, noopGRPC{}, paymentCheck2,
+	caseRepo := mocks.NewCaseRepo(t)
+	dialogRepo := mocks.NewDialogRepo(t)
+	interactionRepo := mocks.NewInteraction(t)
+	redisClient := mocks.NewInteractor(t)
+	subRedis := mocks.NewSubscriptionInfo(t)
+	paymentCheck := mocks.NewPaymentGrpcClient(t)
+	llm := mocks.NewLLM(t)
+	grpcLevel := mocks.NewLevelGrpcClient(t)
+
+	svc := NewCaseGoCoreService(
+		redisClient, subRedis,
+		caseRepo, dialogRepo, interactionRepo,
+		llm, noopGRPC{}, paymentCheck, grpcLevel,
 	)
 
 	user := models.UserIdentity{UserID: 7}
 	dialog := &models.Dialog{ID: 1, UserID: 7, CaseID: 99}
 	history := []models.Interaction{{DialogID: 1, Step: 1}}
+	xp := int32(10)
 
-	dialogRepo2.On("GetDialogByID", ctx, int64(1)).Return(dialog, nil)
-	redisClient2.On("GetFullHistory", ctx, int64(1)).Return(history, nil)
+	dialogRepo.On("GetDialogByID", ctx, int64(1)).Return(dialog, nil)
+	caseRepo.On("GetCaseByID", ctx, int64(99)).Return(&models.Case{ID: 99, Xp: &xp}, nil)
+	redisClient.On("GetFullHistory", ctx, int64(1)).Return(history, nil)
 
 	tx := mocks.NewTx(t)
-	interactionRepo2.On("Begin", ctx).Return(tx, nil)
-	interactionRepo2.On("WithTx", tx).Return(interactionRepo2)
-	interactionRepo2.On("PutInteraction", ctx, &history[0]).Return(nil)
+	interactionRepo.On("Begin", ctx).Return(tx, nil)
+	interactionRepo.On("WithTx", tx).Return(interactionRepo)
+	interactionRepo.On("PutInteraction", ctx, &history[0]).Return(nil)
 	tx.On("Commit").Return(nil)
 	tx.On("Rollback").Return(nil)
 
-	llm2.On("AnalyzeCase", ctx, mock.MatchedBy(func(conv []models.Interaction) bool {
+	llm.On("AnalyzeCase", ctx, mock.MatchedBy(func(conv []models.Interaction) bool {
 		return len(conv) == 1 && conv[0].DialogID == 1 && conv[0].Step == 1
 	})).Return(&dto.Result{
 		StepsCount: 1,
@@ -318,20 +326,16 @@ func TestCompleteDialogService(t *testing.T) {
 		},
 	}, nil)
 
-	redisClient2.On("Clear", ctx, int64(1)).Return(nil)
+	redisClient.On("Clear", ctx, int64(1)).Return(nil)
 
-	got, err := svc2.CompleteDialogService(ctx, 1, user)
+	grpcLevel.On("LevelDoneGrpcHandler", mock.Anything, user, mock.Anything).
+		Return(&dto.UserLevelInfo{Level: 1, Xp: xp, IsLevelUp: false}, nil)
 
-	// Подавляем предупреждения компилятора об неиспользуемых переменных из первого newSvc.
-	_ = svc
-	_ = dialogRepo
-	_ = interactionRepo
-	_ = redisClient
-	_ = llm
+	got, err := svc.CompleteDialogService(ctx, 1, user)
 
 	require.NoError(t, err)
 	require.NotNil(t, got)
-	assert.Equal(t, int32(1), got.StepsCount)
+	assert.Equal(t, int32(1), got.Result.StepsCount)
 }
 
 // ────────────────────────────────────────────────────────────────────────────

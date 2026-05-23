@@ -15,7 +15,7 @@ import (
 type CaseGoService interface {
 	StartDialogService(ctx context.Context, caseID int64, user models.UserIdentity) (*dto.StartDialogResponse, error)
 	HandleInteractionService(ctx context.Context, interaction *dto.InteractionDto, user models.UserIdentity) (*dto.CaseDto, error)
-	CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.Result, error)
+	CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.ResultResponse, error)
 
 	GetCasesService(ctx context.Context, limit, page int, settings *dto.UserSettingsDto) ([]models.Case, error)
 	GetCaseByIDService(ctx context.Context, caseID int64) (*models.Case, error)
@@ -41,9 +41,10 @@ type CaseGoCoreService struct {
 	llmService      llm_service.LLM
 	grpcHandler     grpc.GRPCService
 	paymentCheck    grpc.PaymentGrpcClient
+	levelResult     grpc.LevelGrpcClient
 }
 
-func NewCaseGoCoreService(redisClient history_repo.Interactor, subRedisClient subscription_repo.SubscriptionInfo, caseGoRepo repository.CaseRepo, dialogRepo repository.DialogRepo, interactionRepo repository.Interaction, llm_service llm_service.LLM, grpc grpc.GRPCService, paymentCheck grpc.PaymentGrpcClient) *CaseGoCoreService {
+func NewCaseGoCoreService(redisClient history_repo.Interactor, subRedisClient subscription_repo.SubscriptionInfo, caseGoRepo repository.CaseRepo, dialogRepo repository.DialogRepo, interactionRepo repository.Interaction, llm_service llm_service.LLM, grpc grpc.GRPCService, paymentCheck grpc.PaymentGrpcClient, grpcLevel grpc.LevelGrpcClient) *CaseGoCoreService {
 	return &CaseGoCoreService{
 		redisClient:     redisClient,
 		subRedisClient:  subRedisClient,
@@ -53,5 +54,6 @@ func NewCaseGoCoreService(redisClient history_repo.Interactor, subRedisClient su
 		llmService:      llm_service,
 		grpcHandler:     grpc,
 		paymentCheck:    paymentCheck,
+		levelResult:     grpcLevel,
 	}
 }
