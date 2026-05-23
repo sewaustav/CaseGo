@@ -93,6 +93,17 @@ jobs:
           script: |
             cd ~/casego/backend
             git pull
+            python3 << 'PYEOF'
+import re
+key = """${{ secrets.AUTH_PUBLIC_KEY }}"""
+escaped = key.strip().replace('\n', r'\n') + r'\n'
+new_line = f'PUBLIC_KEY="{escaped}"'
+path = '/home/maks/casego/backend/CaseGo/.env'
+content = open(path).read()
+content = re.sub(r'PUBLIC_KEY=.*', new_line, content)
+open(path, 'w').write(content)
+print(f'Updated {path}')
+PYEOF
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull case-go
             docker compose up -d --no-deps case-go

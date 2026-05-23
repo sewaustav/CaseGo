@@ -160,8 +160,8 @@ jobs:
           script: |
             cd ~/casego/backend
             mkdir -p Auth/keys
-            echo "${{ secrets.AUTH_PRIVATE_KEY }}" > Auth/keys/private.pem
-            echo "${{ secrets.AUTH_PUBLIC_KEY }}" > Auth/keys/public.pem
+            [ -f Auth/keys/private.pem ] || echo "${{ secrets.AUTH_PRIVATE_KEY }}" > Auth/keys/private.pem
+            [ -f Auth/keys/public.pem ] || echo "${{ secrets.AUTH_PUBLIC_KEY }}" > Auth/keys/public.pem
             chmod 644 Auth/keys/private.pem Auth/keys/public.pem
             git pull
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
