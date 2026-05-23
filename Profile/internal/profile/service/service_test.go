@@ -27,7 +27,8 @@ func TestCreateProfileService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -119,7 +120,8 @@ func TestCreateProfileService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -161,7 +163,8 @@ func TestCreateProfileService(t *testing.T) {
 	t.Run("begin tx error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -183,7 +186,8 @@ func TestCreateProfileService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -211,7 +215,8 @@ func TestCreateProfileService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -238,7 +243,8 @@ func TestCreateProfileService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -265,7 +271,8 @@ func TestCreateProfileService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -296,7 +303,8 @@ func TestUpdateProfileService(t *testing.T) {
 	t.Run("success with sex", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -348,7 +356,8 @@ func TestUpdateProfileService(t *testing.T) {
 	t.Run("success without sex", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -373,7 +382,8 @@ func TestUpdateProfileService(t *testing.T) {
 	t.Run("error - conflict", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -402,7 +412,8 @@ func TestPatchProfileService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -430,7 +441,8 @@ func TestPatchProfileService(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -452,7 +464,8 @@ func TestGetUserProfileService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -493,7 +506,8 @@ func TestGetUserProfileService(t *testing.T) {
 	t.Run("profile not found", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -510,7 +524,8 @@ func TestGetUserProfileService(t *testing.T) {
 	t.Run("user not active", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -529,7 +544,8 @@ func TestGetUserProfileService(t *testing.T) {
 	t.Run("get purposes error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -548,7 +564,8 @@ func TestGetUserProfileService(t *testing.T) {
 	t.Run("get socials error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -572,7 +589,8 @@ func TestGetUserProfileByIDService(t *testing.T) {
 	t.Run("success - own profile", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -601,7 +619,8 @@ func TestGetUserProfileByIDService(t *testing.T) {
 	t.Run("success - admin access to other user profile", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		adminID := int64(1)
@@ -625,7 +644,8 @@ func TestGetUserProfileByIDService(t *testing.T) {
 	t.Run("forbidden - not owner and not admin", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -645,7 +665,8 @@ func TestGetUserProfileByIDService(t *testing.T) {
 	t.Run("profile not found", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -662,7 +683,8 @@ func TestGetUserProfileByIDService(t *testing.T) {
 	t.Run("get purposes error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -681,7 +703,8 @@ func TestGetUserProfileByIDService(t *testing.T) {
 	t.Run("get socials error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -706,7 +729,8 @@ func TestUpdatePurposeService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -739,7 +763,8 @@ func TestUpdatePurposeService(t *testing.T) {
 	t.Run("begin tx error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -758,7 +783,8 @@ func TestUpdatePurposeService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -780,7 +806,8 @@ func TestUpdatePurposeService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -807,7 +834,8 @@ func TestUpdateSocialLinkService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -840,7 +868,8 @@ func TestUpdateSocialLinkService(t *testing.T) {
 	t.Run("begin tx error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -859,7 +888,8 @@ func TestUpdateSocialLinkService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -881,7 +911,8 @@ func TestUpdateSocialLinkService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -907,7 +938,8 @@ func TestAddPurposesService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -943,7 +975,8 @@ func TestAddPurposesService(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -965,7 +998,8 @@ func TestAddSocialLinksService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1002,7 +1036,8 @@ func TestAddSocialLinksService(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1024,7 +1059,8 @@ func TestDeletePurposeService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1043,7 +1079,8 @@ func TestDeletePurposeService(t *testing.T) {
 	t.Run("get owner error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1059,7 +1096,8 @@ func TestDeletePurposeService(t *testing.T) {
 	t.Run("forbidden - not owner", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1076,7 +1114,8 @@ func TestDeletePurposeService(t *testing.T) {
 	t.Run("delete error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1097,7 +1136,8 @@ func TestDeleteLinkService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1116,7 +1156,8 @@ func TestDeleteLinkService(t *testing.T) {
 	t.Run("get owner error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1132,7 +1173,8 @@ func TestDeleteLinkService(t *testing.T) {
 	t.Run("forbidden - not owner", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1149,7 +1191,8 @@ func TestDeleteLinkService(t *testing.T) {
 	t.Run("delete error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1170,7 +1213,8 @@ func TestDeleteProfileService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1187,7 +1231,8 @@ func TestDeleteProfileService(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1207,7 +1252,8 @@ func TestDeleteProfileWithoutRecoveryService(t *testing.T) {
 	t.Run("success - admin", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.Admin}
@@ -1224,7 +1270,8 @@ func TestDeleteProfileWithoutRecoveryService(t *testing.T) {
 	t.Run("forbidden - not admin", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1238,7 +1285,8 @@ func TestDeleteProfileWithoutRecoveryService(t *testing.T) {
 	t.Run("delete error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.Admin}
@@ -1259,7 +1307,8 @@ func TestAddProfessionService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1293,7 +1342,8 @@ func TestAddProfessionService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1329,7 +1379,8 @@ func TestAddProfessionService(t *testing.T) {
 	t.Run("begin tx error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1348,7 +1399,8 @@ func TestAddProfessionService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1370,7 +1422,8 @@ func TestAddProfessionService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1394,7 +1447,8 @@ func TestAddProfessionService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1423,7 +1477,8 @@ func TestAddProfessionService(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		mockTx := new(mocks.Tx)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1450,7 +1505,8 @@ func TestEditProfessionCategoryService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1474,7 +1530,8 @@ func TestEditProfessionCategoryService(t *testing.T) {
 	t.Run("get owner error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1492,7 +1549,8 @@ func TestEditProfessionCategoryService(t *testing.T) {
 	t.Run("forbidden - not owner", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1511,7 +1569,8 @@ func TestEditProfessionCategoryService(t *testing.T) {
 	t.Run("edit profession error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1534,7 +1593,8 @@ func TestDeleteProfessionService(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userID := int64(1)
@@ -1553,7 +1613,8 @@ func TestDeleteProfessionService(t *testing.T) {
 	t.Run("get owner error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1569,7 +1630,8 @@ func TestDeleteProfessionService(t *testing.T) {
 	t.Run("forbidden - not owner", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1586,7 +1648,8 @@ func TestDeleteProfessionService(t *testing.T) {
 	t.Run("delete error", func(t *testing.T) {
 		mockRepo := new(mocks.ProfileRepo)
 		catRepo := new(mocks.CategoryRepo)
-		svc := service.NewProfileService(mockRepo, catRepo)
+		levelRepo := new(mocks.LevelRepo)
+		svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 		ctx := context.Background()
 		userInfo := models.UserIdentity{UserID: 1, Role: models.User}
@@ -1606,8 +1669,9 @@ func TestDeleteProfessionService(t *testing.T) {
 func TestNewProfileService(t *testing.T) {
 	mockRepo := new(mocks.ProfileRepo)
 	catRepo := new(mocks.CategoryRepo)
+	levelRepo := new(mocks.LevelRepo)
 
-	svc := service.NewProfileService(mockRepo, catRepo)
+	svc := service.NewProfileService(mockRepo, catRepo, levelRepo)
 
 	assert.NotNil(t, svc)
 }

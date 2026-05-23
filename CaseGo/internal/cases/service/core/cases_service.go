@@ -65,6 +65,7 @@ func (s *CaseGoCoreService) CreateCaseService(ctx context.Context, caseDto *dto.
 		IsGenerated:   false,
 		FirstQuestion: *caseDto.FirstQuestion,
 		Creator:       user.UserID,
+		Xp:            caseDto.Xp,
 	})
 	if err != nil {
 		if errors.Is(err, apperrors.ErrAlreadyExists) {
@@ -106,6 +107,7 @@ func (s *CaseGoCoreService) PatchCaseService(ctx context.Context, caseID int64, 
 		IsGenerated:   false,
 		FirstQuestion: *caseDto.FirstQuestion,
 		Creator:       user.UserID,
+		Xp:            caseDto.Xp,
 	})
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {

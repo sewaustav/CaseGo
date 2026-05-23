@@ -17,23 +17,23 @@ type CaseGoService struct {
 }
 
 // CompleteDialogService provides a mock function with given fields: ctx, dialogID, user
-func (_m *CaseGoService) CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.Result, error) {
+func (_m *CaseGoService) CompleteDialogService(ctx context.Context, dialogID int64, user models.UserIdentity) (*dto.ResultResponse, error) {
 	ret := _m.Called(ctx, dialogID, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CompleteDialogService")
 	}
 
-	var r0 *dto.Result
+	var r0 *dto.ResultResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) (*dto.Result, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) (*dto.ResultResponse, error)); ok {
 		return rf(ctx, dialogID, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) *dto.Result); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UserIdentity) *dto.ResultResponse); ok {
 		r0 = rf(ctx, dialogID, user)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*dto.Result)
+			r0 = ret.Get(0).(*dto.ResultResponse)
 		}
 	}
 
