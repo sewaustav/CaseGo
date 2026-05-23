@@ -22,9 +22,12 @@ func NewPostgresCaseRepo(db *sql.DB) *PostgresCaseRepo {
 }
 
 func (r *PostgresCaseRepo) CreateCase(ctx context.Context, caseCopy *models.Case) (*models.Case, error) {
+	if caseCopy.Xp == nil {
+		caseCopy.Xp = new(int32(100))
+	}
 	query := psql.
 		Insert("cases").
-		Columns("topic", "category", "is_generated", "description", "first_question", "creator").
+		Columns("topic", "category", "is_generated", "description", "first_question", "creator", "xp").
 		Values(
 			caseCopy.Topic,
 			caseCopy.Category,
@@ -32,6 +35,7 @@ func (r *PostgresCaseRepo) CreateCase(ctx context.Context, caseCopy *models.Case
 			caseCopy.Description,
 			caseCopy.FirstQuestion,
 			caseCopy.Creator,
+			caseCopy.Xp,
 		).
 		Suffix("RETURNING id, created_at")
 
@@ -49,7 +53,7 @@ func (r *PostgresCaseRepo) CreateCase(ctx context.Context, caseCopy *models.Case
 
 func (r *PostgresCaseRepo) GetCaseByID(ctx context.Context, caseID int64) (*models.Case, error) {
 	query := psql.
-		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at").
+		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at", "xp").
 		From("cases").
 		Where(sq.Eq{"id": caseID})
 
@@ -68,6 +72,7 @@ func (r *PostgresCaseRepo) GetCaseByID(ctx context.Context, caseID int64) (*mode
 		&c.FirstQuestion,
 		&c.Creator,
 		&c.CreatedAt,
+		&c.Xp,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("case id=%d: %w", caseID, apperrors.ErrNotFound)
@@ -80,7 +85,7 @@ func (r *PostgresCaseRepo) GetCaseByID(ctx context.Context, caseID int64) (*mode
 
 func (r *PostgresCaseRepo) GetCases(ctx context.Context, limit int, offset int) ([]models.Case, error) {
 	query := psql.
-		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at").
+		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at", "xp").
 		From("cases").
 		OrderBy("id DESC").
 		Limit(uint64(limit)).
@@ -109,6 +114,7 @@ func (r *PostgresCaseRepo) GetCases(ctx context.Context, limit int, offset int) 
 			&c.FirstQuestion,
 			&c.Creator,
 			&c.CreatedAt,
+			&c.Xp,
 		); err != nil {
 			return nil, fmt.Errorf("get cases: scan: %w", err)
 		}
@@ -124,7 +130,7 @@ func (r *PostgresCaseRepo) GetCases(ctx context.Context, limit int, offset int) 
 
 func (r *PostgresCaseRepo) GetCasesByCategory(ctx context.Context, categoryID int32, limit int, offset int) ([]models.Case, error) {
 	query := psql.
-		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at").
+		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at", "xp").
 		From("cases").
 		Where(sq.Eq{"category": categoryID}).
 		OrderBy("id DESC").
@@ -154,6 +160,7 @@ func (r *PostgresCaseRepo) GetCasesByCategory(ctx context.Context, categoryID in
 			&c.FirstQuestion,
 			&c.Creator,
 			&c.CreatedAt,
+			&c.Xp,
 		); err != nil {
 			return nil, fmt.Errorf("get cases by category: scan: %w", err)
 		}
@@ -169,7 +176,7 @@ func (r *PostgresCaseRepo) GetCasesByCategory(ctx context.Context, categoryID in
 
 func (r *PostgresCaseRepo) GetCasesByTopic(ctx context.Context, topicID string, limit int, offset int) ([]models.Case, error) {
 	query := psql.
-		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at").
+		Select("id", "topic", "category", "is_generated", "description", "first_question", "creator", "created_at", "xp").
 		From("cases").
 		Where(sq.Eq{"topic": topicID}).
 		OrderBy("id DESC").
@@ -199,6 +206,7 @@ func (r *PostgresCaseRepo) GetCasesByTopic(ctx context.Context, topicID string, 
 			&c.FirstQuestion,
 			&c.Creator,
 			&c.CreatedAt,
+			&c.Xp,
 		); err != nil {
 			return nil, fmt.Errorf("get cases by topic: scan: %w", err)
 		}
@@ -220,8 +228,13 @@ func (r *PostgresCaseRepo) PatchCase(ctx context.Context, caseCopy *models.Case)
 		Set("is_generated", caseCopy.IsGenerated).
 		Set("description", caseCopy.Description).
 		Set("first_question", caseCopy.FirstQuestion).
-		Set("creator", caseCopy.Creator).
-		Where(sq.Eq{"id": caseCopy.ID}).
+		Set("creator", caseCopy.Creator)
+
+	if caseCopy.Xp != nil {
+		query = query.Set("xp", caseCopy.Xp)
+	}
+
+	query = query.Where(sq.Eq{"id": caseCopy.ID}).
 		Suffix("RETURNING id, created_at")
 
 	sqlStr, args, err := query.ToSql()

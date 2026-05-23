@@ -31,16 +31,22 @@ type ProfileCore interface {
 	EditProfessionCategoryService(ctx context.Context, usr models.UserIdentity, profession *models.UserProfession) (*models.UserProfession, error)
 	DeleteProfessionService(ctx context.Context, id int64, usr models.UserIdentity) error
 	GetProfessionsService(ctx context.Context, usr models.UserIdentity) ([]models.UserProfession, error)
+
+	UpdateLevelService(ctx context.Context, usr models.UserIdentity, level *dto.LevelDto) (*models.UserLevel, error)
+	GetLevelService(ctx context.Context, usr models.UserIdentity) (*models.UserLevel, error)
+	DeleteLevelService(ctx context.Context, usr models.UserIdentity) error
 }
 
 type ProfileService struct {
-	repo    profilerepo.ProfileRepo
-	catRepo repo.CategoryRepo
+	repo      profilerepo.ProfileRepo
+	catRepo   repo.CategoryRepo
+	levelRepo profilerepo.LevelRepo
 }
 
-func NewProfileService(repo profilerepo.ProfileRepo, catRepo repo.CategoryRepo) *ProfileService {
+func NewProfileService(repo profilerepo.ProfileRepo, catRepo repo.CategoryRepo, levelRepo profilerepo.LevelRepo) *ProfileService {
 	return &ProfileService{
-		repo:    repo,
-		catRepo: catRepo,
+		repo:      repo,
+		catRepo:   catRepo,
+		levelRepo: levelRepo,
 	}
 }

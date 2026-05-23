@@ -1,4 +1,4 @@
-package profile_handler
+package http
 
 import (
 	"github.com/YoungFlores/Case_Go/Profile/pkg/middleware/rs256"
