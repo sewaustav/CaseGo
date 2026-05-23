@@ -159,6 +159,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/casego/backend
+            mkdir -p Auth/keys
+            echo "${{ secrets.AUTH_PRIVATE_KEY }}" > Auth/keys/private.pem
+            echo "${{ secrets.AUTH_PUBLIC_KEY }}" > Auth/keys/public.pem
             git pull
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull auth-fastapi auth-migrate
