@@ -60,7 +60,7 @@ func New() (*Server, error) {
 
 	tokenService := tk.NewToken(conf.PrivateKey)
 
-	grpsClient, err := grpc.NewCaseGoGRPC(conf.GRPCSEVER, tokenService)
+	grpsClient, err := grpc.NewCaseGoGRPC(conf.GRPCSERVER, tokenService)
 	if err != nil {
 		return nil, err
 	}

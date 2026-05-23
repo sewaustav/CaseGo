@@ -50,7 +50,7 @@ func NewPaymentCheckGRPCHandler(addr string) (PaymentGrpcClient, error) {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		addr,
 		grpc.WithTransportCredentials(
 			credentials.NewTLS(tlsConfig),

@@ -27,7 +27,7 @@ type Config struct {
 	LLMProvider     string // "deepseek" | "gigachat"
 	GigaChatAuthKey string
 
-	GRPCSEVER         string
+	GRPCSERVER        string
 	PAYMENTGRPCSERVER string
 	LEVELGRPCSERVER   string
 
@@ -83,7 +83,7 @@ func LoadConfig() *Config {
 		LLMURL:            os.Getenv("LLM_URL"),
 		LLMProvider:       os.Getenv("LLM_PROVIDER"),
 		GigaChatAuthKey:   os.Getenv("GIGACHAT_AUTH_KEY"),
-		GRPCSEVER:         os.Getenv("GRPC_SEVER"),
+		GRPCSERVER:        os.Getenv("GRPC_SERVER"),
 		PAYMENTGRPCSERVER: os.Getenv("PAYMENT_GRPC_SERVER"),
 		LEVELGRPCSERVER:   os.Getenv("LEVEL_GRPC_SERVER"),
 	}
