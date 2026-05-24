@@ -96,7 +96,7 @@ jobs:
           script: |
             cd ~/casego/backend
             git fetch origin && git reset --hard origin/main
-            python3 -c 'import re,os; k=os.environ["AUTH_PUBLIC_KEY"]; e=k.strip().replace(chr(10),r"\n")+r"\n"; v="PUBLIC_KEY=\""+e+"\""; p="/home/maks/casego/backend/CaseGo/.env"; c=open(p).read(); open(p,"w").write(re.sub(r"PUBLIC_KEY=.*",lambda m:v,c)); print("Updated",p)'
+            python3 -c 'import re,os; k=os.environ["AUTH_PUBLIC_KEY"]; e=k.strip().replace(chr(10),r"\n")+r"\n"; v="PUBLIC_KEY=\""+e+"\""; p="/home/maks/casego/backend/CaseGo/.env"; c=open(p).read(); open(p,"w").write(re.sub(r"PUBLIC_KEY=(\x22[^\x22]*\x22|[^\n]*)",lambda m:v,c,flags=re.DOTALL)); print("Updated",p)'
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull case-go
             docker compose up -d --no-deps case-go
