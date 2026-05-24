@@ -3,9 +3,9 @@ from fastapi.exceptions import HTTPException
 
 from schemas.token import TokenPair, RefreshTokenRequest, AuthRequest
 
-from repositories.user import get_user_by_login
+from repositories.user import get_user_by_login, get_user_by_id
 from ...dependencies import get_db_session, google_oauth
-from services.token import create_token_pair, refresh_access_token
+from services.token import create_token_pair, refresh_access_token, decode_token
 from fastapi.security import OAuth2PasswordRequestForm
 from services.auth import authenticate_user
 from typing import Annotated
@@ -66,11 +66,17 @@ async def refresh_token_endpoint(body: RefreshTokenRequest,
 							   db: Annotated[AsyncSession, Depends(get_db_session)]
 							   ) -> TokenPair:
 	"""
-	Обновление access токена с помощью refresh токена
+	Обновление access токена с помощью refresh токена.
+	Явно достаём роль пользователя из БД, чтобы user_role попал в новый токен.
 	"""
+	payload = decode_token(body.refresh_token)
+	user_id = int(payload.sub)
+	user = await get_user_by_id(user_id, db)
+	if user is None:
+		raise HTTPException(status_code=401, detail="User not found")
 	tokens_data = await refresh_access_token(
 		refresh_token=body.refresh_token,
-		additional_data=None,
+		additional_data={"user_role": str(user.role)},
 	)
 
 	return tokens_data

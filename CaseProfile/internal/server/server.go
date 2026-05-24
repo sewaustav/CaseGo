@@ -45,8 +45,8 @@ func New() (*Server, error) {
 
 	profileService := service.NewCaseResultService(repo)
 
-	httpJwtAuthMiddleware := rs256.New(conf.PublicKey, "auth", "all")
-	grpcJwtAuthMiddleware := rs256.New(conf.PublicKey, "cases", "profile")
+	httpJwtAuthMiddleware := rs256.New(conf.AuthPublicKey, "auth", "all")
+	grpcJwtAuthMiddleware := rs256.New(conf.CaseGoPublicKey, "cases", "profile")
 
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(grpcJwtAuthMiddleware.GrpcInterceptor),

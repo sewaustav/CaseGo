@@ -19,20 +19,36 @@ type Config struct {
 	DBHost     string
 	DBPort     int
 
-	PublicKey *rsa.PublicKey
+	// AuthPublicKey — ключ Auth-сервиса, которым подписаны пользовательские JWT.
+	// Используется HTTP-middleware для проверки запросов от Flutter-клиента.
+	AuthPublicKey *rsa.PublicKey
+
+	// CaseGoPublicKey — ключ CaseGo, которым подписаны сервисные JWT.
+	// Используется gRPC-interceptor для проверки запросов от CaseGo.
+	CaseGoPublicKey *rsa.PublicKey
 }
 
 func LoadConfig() *Config {
 	godotenv.Load()
 
-	publicKeyStr := os.Getenv("PUBLIC_KEY")
-	if publicKeyStr == "" {
-		panic("PUBLIC_KEY environment variable not set")
+	// Auth public key (для HTTP-роутов)
+	authKeyStr := os.Getenv("AUTH_PUBLIC_KEY")
+	if authKeyStr == "" {
+		panic("AUTH_PUBLIC_KEY environment variable not set")
+	}
+	authPublicKey, err := ParseRSAPublicKey(authKeyStr)
+	if err != nil {
+		log.Fatalf("Failed to parse AUTH_PUBLIC_KEY: %v", err)
 	}
 
-	publicKey, err := ParseRSAPublicKey(publicKeyStr)
+	// CaseGo public key (для gRPC)
+	caseGoKeyStr := os.Getenv("CASEGO_PUBLIC_KEY")
+	if caseGoKeyStr == "" {
+		panic("CASEGO_PUBLIC_KEY environment variable not set")
+	}
+	caseGoPublicKey, err := ParseRSAPublicKey(caseGoKeyStr)
 	if err != nil {
-		log.Fatal(publicKeyStr)
+		log.Fatalf("Failed to parse CASEGO_PUBLIC_KEY: %v", err)
 	}
 
 	dbPortStr := os.Getenv("POSTGRES_PORT")
@@ -42,12 +58,13 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		DBHost:     os.Getenv("POSTGRES_HOST"),
-		DBName:     os.Getenv("POSTGRES_DB"),
-		DBUser:     os.Getenv("POSTGRES_USER"),
-		DBPassword: os.Getenv("POSTGRES_PASSWORD"),
-		DBPort:     dbPort,
-		PublicKey:  publicKey,
+		DBHost:          os.Getenv("POSTGRES_HOST"),
+		DBName:          os.Getenv("POSTGRES_DB"),
+		DBUser:          os.Getenv("POSTGRES_USER"),
+		DBPassword:      os.Getenv("POSTGRES_PASSWORD"),
+		DBPort:          dbPort,
+		AuthPublicKey:   authPublicKey,
+		CaseGoPublicKey: caseGoPublicKey,
 	}
 }
 

@@ -88,15 +88,36 @@ jobs:
         uses: appleboy/ssh-action@v1
         env:
           AUTH_PUBLIC_KEY: ${{ secrets.AUTH_PUBLIC_KEY }}
+          CASEGO_PUBLIC_KEY: ${{ secrets.CASEGO_PUBLIC_KEY }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: maks
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: AUTH_PUBLIC_KEY
+          envs: AUTH_PUBLIC_KEY,CASEGO_PUBLIC_KEY
           script: |
             cd ~/casego/backend
             git fetch origin && git reset --hard origin/main
-            python3 -c 'import re,os; k=os.environ["AUTH_PUBLIC_KEY"]; e=k.strip().replace(chr(10),r"\n")+r"\n"; v="PUBLIC_KEY=\""+e+"\""; p="/home/maks/casego/backend/CaseProfile/.env"; c=open(p).read(); open(p,"w").write(re.sub(r"PUBLIC_KEY=(\x22[^\x22]*\x22|[^\n]*)",lambda m:v,c,flags=re.DOTALL)); print("Updated",p)'
+            python3 -c '
+import re, os
+
+def set_env_key(content, var, raw_value):
+    """Записывает/обновляет переменную var в содержимом .env-файла."""
+    escaped = raw_value.strip().replace(chr(10), r"\n")
+    new_line = var + "=\"" + escaped + "\""
+    pattern = var + r'=(\x22[^\x22]*\x22|[^\n]*)'
+    if re.search(pattern, content, flags=re.DOTALL):
+        return re.sub(pattern, lambda m: new_line, content, flags=re.DOTALL)
+    return content + "\n" + new_line + "\n"
+
+p = "/home/maks/casego/backend/CaseProfile/.env"
+c = open(p).read()
+# Удалить старый PUBLIC_KEY если остался
+c = re.sub(r"(?m)^PUBLIC_KEY=.*\n?", "", c)
+c = set_env_key(c, "AUTH_PUBLIC_KEY",   os.environ["AUTH_PUBLIC_KEY"])
+c = set_env_key(c, "CASEGO_PUBLIC_KEY", os.environ["CASEGO_PUBLIC_KEY"])
+open(p, "w").write(c)
+print("Updated", p)
+'
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull case-profile
             docker compose up -d --no-deps case-profile
