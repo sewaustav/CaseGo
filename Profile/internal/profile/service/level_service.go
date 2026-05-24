@@ -2,16 +2,18 @@ package profileService
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
 	dto "github.com/YoungFlores/Case_Go/Profile/internal/profile/dto"
 	"github.com/YoungFlores/Case_Go/Profile/internal/profile/models"
+	repoerr "github.com/YoungFlores/Case_Go/Profile/internal/profile/repository/errors"
 )
 
 func (s *ProfileService) UpdateLevelService(ctx context.Context, usr models.UserIdentity, req *dto.LevelDto) (*models.UserLevel, error) {
 	currentProfile, err := s.levelRepo.GetUserLevel(ctx, usr.UserID)
-	if err != nil {
+	if err != nil && !errors.Is(err, repoerr.ErrNotFound) {
 		return nil, fmt.Errorf("failed to get user level: %w", err)
 	}
 
