@@ -56,8 +56,11 @@ services:
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
+    volumes:
+      - ./certs:/app/certs:ro
     ports:
       - "8080:8080"
+      - "50053:50053"
     depends_on:
       postgres:
         condition: service_healthy
