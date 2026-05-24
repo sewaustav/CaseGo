@@ -21,7 +21,7 @@ import (
 const (
 	gigachatAuthURL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 	gigachatAPIURL  = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
-	gigachatModel   = "GigaChat-Pro"
+	gigachatModel   = "GigaChat"
 )
 
 type GigaChatService struct {
