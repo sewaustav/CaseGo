@@ -489,6 +489,12 @@ func TestGetUserProfileService(t *testing.T) {
 		mockRepo.On("GetUserProfile", ctx, userID).Return(profile, nil)
 		mockRepo.On("GetUserPurposes", ctx, userID).Return(purposes, nil)
 		mockRepo.On("GetUserSocials", ctx, userID).Return(links, nil)
+		levelRepo.On("GetUserLevel", ctx, userID).Return(&models.UserLevel{
+			UserID: userID,
+			Xp:     100,
+			Level:  2,
+			Streak: 1,
+		}, nil)
 
 		res, err := svc.GetUserProfileService(ctx, userInfo)
 
@@ -500,7 +506,10 @@ func TestGetUserProfileService(t *testing.T) {
 		assert.Equal(t, "Purpose 1", res.UsrPurposes[0].Purpose)
 		assert.Equal(t, 1, len(res.UsrSocials))
 		assert.Equal(t, "telegram", res.UsrSocials[0].Type)
+		assert.NotNil(t, res.UsrLevel)
+		assert.Equal(t, 100, res.UsrLevel.Xp)
 		mockRepo.AssertExpectations(t)
+		levelRepo.AssertExpectations(t)
 	})
 
 	t.Run("profile not found", func(t *testing.T) {
