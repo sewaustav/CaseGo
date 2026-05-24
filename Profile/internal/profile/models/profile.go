@@ -66,6 +66,7 @@ type UserProfile struct {
 	UsrProfile  Profile
 	UsrPurposes []UserPurpose
 	UsrSocials  []UserSocialLink
+	UsrLevel    *UserLevel
 }
 
 type UserLevel struct {

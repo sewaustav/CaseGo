@@ -222,10 +222,16 @@ func (s *ProfileService) GetUserProfileService(ctx context.Context, usr models.U
 		return nil, err
 	}
 
+	level, err := s.levelRepo.GetUserLevel(ctx, usr.UserID)
+	if err != nil {
+		level = nil
+	}
+
 	return &models.UserProfile{
 		UsrProfile:  *profile,
 		UsrPurposes: purposes,
 		UsrSocials:  links,
+		UsrLevel:    level,
 	}, nil
 }
 
