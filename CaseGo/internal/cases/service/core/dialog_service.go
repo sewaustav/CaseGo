@@ -190,7 +190,6 @@ func (s *CaseGoCoreService) CompleteDialogService(ctx context.Context, dialogID 
 		case lvl := <-levelChan:
 			finalLevel = lvl
 		case err := <-errChan:
-			// Если хоть одна горутина упала — возвращаем ошибку
 			return nil, apperrors.NewInternal("failed to complete dialog tasks", err)
 		case <-ctx.Done():
 			return nil, apperrors.NewInternal("request timeout", ctx.Err())

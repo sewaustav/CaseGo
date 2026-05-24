@@ -48,7 +48,7 @@ func NewLevelGrpcHandler(addr string) (*LevelGrpcHandler, error) {
 		Certificates: []tls.Certificate{clientCert},
 		RootCAs:      caPool,
 
-		ServerName: "payment-service",
+		ServerName: "level-service",
 
 		MinVersion: tls.VersionTLS12,
 	}
