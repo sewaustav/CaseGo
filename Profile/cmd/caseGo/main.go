@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -44,6 +45,18 @@ func main() {
 		slog.Info("Starting server", "addr", srv.HTTP.Addr)
 		if err := srv.HTTP.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("Server error", "error", err)
+		}
+	}()
+
+	go func() {
+		lis, err := net.Listen("tcp", ":50053")
+		if err != nil {
+			slog.Error("Failed to listen gRPC", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("Starting gRPC server", "addr", ":50053")
+		if err := srv.GRPC.Serve(lis); err != nil {
+			slog.Error("gRPC server error", "error", err)
 		}
 	}()
 
