@@ -10,7 +10,7 @@ services:
                cd /scripts && 
                chmod +x gen.sh && 
                ./gen.sh && 
-               cp *.pem /out/ 2>/dev/null || cp *.crt /out/ 2>/dev/null || cp *.key /out/ 2>/dev/null"
+               cp *.crt *.key /out/"
       networks:
         - app-network
   # ── Profile ──────────────────────────────────────────────

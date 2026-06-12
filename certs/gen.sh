@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# Идемпотентность: повторный запуск (например, docker compose up перезапускает
+# certs-gen) НЕ должен перегенерировать CA — иначе уже запущенные сервисы
+# остаются со старыми сертами в памяти и mTLS разваливается до полного рестарта.
+if [ -f ca.crt ] && [ -f payment.crt ] && [ -f profile.crt ] && [ -f general-client.crt ]; then
+    echo "certs already exist, skipping generation"
+    exit 0
+fi
+
 openssl genrsa -out ca.key 4096
 openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj "/CN=MyLocalCA"
 
