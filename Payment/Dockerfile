@@ -15,5 +15,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /payment ./cmd/...
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /payment .
+COPY --from=builder /app/migrations ./migrations
 EXPOSE 8085 50052
 CMD ["/app/payment"]
