@@ -1,16 +1,16 @@
-name: CI - CaseGo (Go)
+name: CI/CD - CaseGo (Go)
 
 on:
   push:
-    branches: [main, develop, 'feature/**', 'feat/**']
+    branches: [main, dev, 'feature/**', 'feat/**']
     paths:
       - 'CaseGo/**'
-      - '.github/workflows/ci-casego.yml'
+      - '.github/workflows/cicd-casego.yml'
   pull_request:
-    branches: [main, develop, 'feature/**', 'feat/**']
+    branches: [main, dev, 'feature/**', 'feat/**']
     paths:
       - 'CaseGo/**'
-      - '.github/workflows/ci-casego.yml'
+      - '.github/workflows/cicd-casego.yml'
 
 jobs:
   test:
@@ -47,7 +47,7 @@ jobs:
     name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') && github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -65,24 +65,33 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set image tags
+        id: tags
+        run: |
+          IMAGE=ghcr.io/${{ github.repository_owner }}/casego-casego
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            # prod: main-теги подхватывает Flux image automation в k8s
+            echo "tags=$IMAGE:main-${{ github.run_number }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            # dev: :latest тянет docker compose на VPS
+            echo "tags=$IMAGE:latest,$IMAGE:dev-${{ github.run_number }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: ./CaseGo
           push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/casego-casego:latest
-            ghcr.io/${{ github.repository_owner }}/casego-casego:main-${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/casego-casego:main-${{ github.run_number }}-${{ github.sha }}
+          tags: ${{ steps.tags.outputs.tags }}
           build-args: GITHUB_TOKEN=${{ secrets.GH_PAT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy CaseGo
+    name: Deploy CaseGo (dev VPS)
     runs-on: ubuntu-latest
     needs: docker
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
 
     steps:
       - name: Deploy via SSH
@@ -96,7 +105,7 @@ jobs:
           envs: AUTH_PUBLIC_KEY
           script: |
             cd ~/casego/backend
-            git fetch origin && git reset --hard origin/main
+            git fetch origin dev && git checkout -B dev origin/dev
             python3 -c 'import re,os; k=os.environ["AUTH_PUBLIC_KEY"]; e=k.strip().replace(chr(10),r"\n")+r"\n"; v="PUBLIC_KEY=\""+e+"\""; p="/home/maks/casego/backend/CaseGo/.env"; c=open(p).read(); open(p,"w").write(re.sub(r"PUBLIC_KEY=(\x22[^\x22]*\x22|[^\n]*)",lambda m:v,c,flags=re.DOTALL)); print("Updated",p)'
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose pull case-go
