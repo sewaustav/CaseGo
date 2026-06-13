@@ -23,6 +23,8 @@ func main() {
 
 	slog.SetDefault(logger)
 
+	slog.Info("CI/CD demo: casego deployed via GitOps pipeline", "env", "prod")
+
 	srv, err := server.New()
 	if err != nil {
 		slog.Error("Failed to initialize server", "error", err)
