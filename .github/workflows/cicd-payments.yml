@@ -16,6 +16,8 @@ jobs:
   test:
     name: Test & Build
     runs-on: ubuntu-latest
+    # тесты — гейт на PR и на push в dev; на push в main пропускаем (PR уже проверил)
+    if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
 
     defaults:
       run:
@@ -47,7 +49,11 @@ jobs:
     name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: test
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') && github.event_name == 'push'
+    if: >-
+      always() &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') &&
+      github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -69,12 +75,15 @@ jobs:
         id: tags
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/casego-payment
+          # монотонная метка: github.run_number сбрасывается при переименовании
+          # workflow, из-за чего numerical ImagePolicy залипает на старом теге
+          SEQ=$(date +%s)
           if [ "${{ github.ref_name }}" = "main" ]; then
             # prod: main-теги подхватывает Flux image automation в k8s
-            echo "tags=$IMAGE:main-${{ github.run_number }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "tags=$IMAGE:main-$SEQ-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           else
             # dev: :latest тянет docker compose на VPS
-            echo "tags=$IMAGE:latest,$IMAGE:dev-${{ github.run_number }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "tags=$IMAGE:latest,$IMAGE:dev-$SEQ-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build and push
