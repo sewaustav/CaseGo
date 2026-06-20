@@ -10,7 +10,7 @@ import (
 func SetupRoutes(httpHandler *http.HttpHandler, middleware *rs256.JWTAuthMiddleware) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // setup later
+		AllowOrigins:     []string{"https://casego.ddns.net"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
